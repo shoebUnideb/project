@@ -1,0 +1,75 @@
+PHASE 1 – FOUNDATION (AUTH + ROLES + ACCESS CONTROL)
+
+Objective: Build the core authentication and role-based access control
+system for a mentorship workflow platform.
+
+Tech Stack: - Backend: Django - Database: PostgreSQL - Use custom User
+model - No frontend framework yet, use very simple html, css (basic).
+
+STEP 1: CREATE DJANGO PROJECT
+
+-   Create a new Django project
+-   Configure PostgreSQL database
+-   Create a custom user model extending AbstractUser
+-   Add the following fields:
+    -   role (choices: superadmin, mentor, student)
+    -   is_approved (BooleanField, default=False)
+-   Set AUTH_USER_MODEL in settings.py
+
+STEP 2: ROLE LOGIC RULES
+
+-   Superadmin:
+    -   Full access to everything, crud to all users and mentors data
+-   Mentor:
+    -   Cannot register themselves (not even through sign up page)
+    -   Created only by Superadmin from admin dashboard (set username and password by superadmin)
+    -   Must have is_approved=True to access system
+-   Student:
+    -   Can register normally through sign up page
+    -   Automatically approved
+    -   Can only access their own data
+
+STEP 3: AUTHENTICATION SYSTEM
+
+-   Implement:
+    -   Login view
+    -   Logout view
+    -   Student registration view
+-   After login, redirect based on role:
+    -   Superadmin → Admin dashboard
+    -   Mentor → Mentor dashboard
+    -   Student → Student dashboard
+
+STEP 4: ROLE-BASED ACCESS CONTROL
+
+Implement permission checks so that:
+
+-   Students:
+    -   Can only view/edit their own profile
+    -   Cannot access mentor or admin URLs
+-   Mentors:
+    -   Cannot access superadmin URLs
+    -   Cannot access unassigned student data (future-ready restriction)
+-   Superadmin:
+    -   Full access to all views
+
+STEP 5: BASIC DASHBOARD PLACEHOLDERS
+
+Create simple placeholder pages for:
+
+-   Superadmin dashboard
+-   Mentor dashboard
+-   Student dashboard
+
+Each page should display: - Logged-in user email - User role
+
+STEP 6: TESTING CHECKLIST
+
+-   Create 1 superadmin via createsuperuser
+-   Create 1 mentor via admin panel or panel 
+-   Register 1 student
+-   Test login for all roles
+-   Test access restrictions manually
+-   Ensure mentor cannot login if is_approved=False
+
+Only focus on authentication and role-based control.

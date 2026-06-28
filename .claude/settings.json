@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:www.mentorcliq.com)",
+      "WebFetch(domain:www.chronus.com)",
+      "WebFetch(domain:www.togetherplatform.com)",
+      "WebFetch(domain:www.mentorloop.com)",
+      "WebFetch(domain:www.pushfar.com)",
+      "WebFetch(domain:www.guider.co)",
+      "WebFetch(domain:www.qooper.io)",
+      "WebFetch(domain:www.graduway.com)",
+      "WebFetch(domain:beter.co)",
+      "WebFetch(domain:www.rivermentoring.com)",
+      "WebFetch(domain:gravyty.com)",
+      "WebFetch(domain:www.river.com)",
+      "WebFetch(domain:river-mentoring.com)",
+      "WebFetch(domain:getriver.com)",
+      "WebFetch(domain:www.capterra.com)",
+      "WebFetch(domain:www.g2.com)",
+      "WebFetch(domain:www.forrester.com)",
+      "WebFetch(domain:mentorloop.com.au)",
+      "WebFetch(domain:mentorloop.com)",
+      "WebFetch(domain:www.guider.io)",
+      "WebFetch(domain:guider.app)",
+      "WebFetch(domain:www.linkedin.com)",
+      "WebFetch(domain:theguider.app)",
+      "WebFetch(domain:beter.io)",
+      "WebFetch(domain:www.together-platform.com)",
+      "WebFetch(domain:www.togethermentoring.com)",
+      "WebFetch(domain:pris.ly)",
+      "WebFetch(domain:www.prisma.io)",
+      "Read(//Users/I770121/Documents/GILE\\\\ org/mentorship-platform/src/app/profile/**)",
+      "Read(//Users/I770121/Documents/GILE\\\\ org/mentorship-platform/src/modules/pairing/**)",
+      "Read(//Users/I770121/Documents/GILE\\\\ org/mentorship-platform/src/modules/goal/**)"
+    ]
+  }
+}

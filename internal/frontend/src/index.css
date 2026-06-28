@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── TipTap editor styles ── */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+}
+.tiptap ul { list-style-type: disc; padding-left: 1.25rem; }
+.tiptap ol { list-style-type: decimal; padding-left: 1.25rem; }
+.tiptap a  { color: #6366f1; text-decoration: underline; }
+.tiptap strong { font-weight: 700; }
+.tiptap em { font-style: italic; }
+.tiptap s  { text-decoration: line-through; }
+
+
+:root {
+  --sidebar-bg:     #1a2744;
+  --sidebar-border: #253557;
+  --font-family:    'Lato', system-ui, sans-serif;
+
+  /* Default primary palette (Aubergine) — overridden by ThemeContext at runtime */
+  --p-50:  246 236 246;
+  --p-100: 231 204 234;
+  --p-200: 207 165 211;
+  --p-300: 179 122 188;
+  --p-400: 151 79 163;
+  --p-500: 122 46 138;
+  --p-600: 74 21 75;
+  --p-700: 59 16 64;
+  --p-800: 45 11 49;
+  --p-900: 30 8 33;
+}
+
+/* ── Global resets ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f8f8;
+  color: #111827;
+}
+
+/* Scrollbar — thinner, darker on dark sidebar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
+
+/* line-clamp utility */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+/* Hide scrollbar while keeping scroll functionality */
+.scrollbar-none { scrollbar-width: none; }
+.scrollbar-none::-webkit-scrollbar { display: none; }
+
+/* Force post body content to respect the selected font (overrides inline styles baked in by execCommand) */
+.post-body, .post-body * { font-family: inherit !important; }
+ */
+.rich-body ul { list-style: disc; padding-left: 1.25rem; margin: 0.25rem 0; }
+.rich-body ol { list-style: decimal; padding-left: 1.25rem; margin: 0.25rem 0; }
+.rich-body li { margin: 0.1rem 0; }
+.rich-body a { color: #2563eb; text-decoration: underline; word-break: break-all; }
+.rich-body a:hover { color: #1d4ed8; }
+.rich-body b, .rich-body strong { font-weight: 600; }
+.rich-body i, .rich-body em { font-style: italic; }
+.rich-body p { margin: 0; }
+.rich-body div + div, .rich-body p + p { margin-top: 0.25rem; }
+
+/* Dark bubble variant (DM sent messages) */
+.rich-body-dark a { color: #93c5fd; }
+.rich-body-dark a:hover { color: #bfdbfe; }
+
+/* contentEditable placeholder */
+.empty-placeholder:empty::before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+}
