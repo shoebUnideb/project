@@ -1,0 +1,5 @@
+2026-06-28 03:59:14,621 INFO     Starting server at tcp:port=8001:interface=127.0.0.1
+2026-06-28 03:59:14,621 INFO     HTTP/2 support not enabled (install the http2 and tls Twisted extras)
+2026-06-28 03:59:14,621 INFO     Configuring endpoint tcp:port=8001:interface=127.0.0.1
+2026-06-28 03:59:14,622 INFO     Listening on TCP address 127.0.0.1:8001
+2026-06-28 04:01:24,598 WARNING  Bad Request: /api/auth/sso/exchange/

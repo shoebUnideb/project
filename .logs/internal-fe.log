@@ -1,0 +1,12 @@
+
+> gile-internal-portal@1.0.0 dev
+> vite
+
+Port 5174 is in use, trying another one...
+Port 5175 is in use, trying another one...
+Port 5176 is in use, trying another one...
+
+  VITE v6.4.3  ready in 171 ms
+
+  ➜  Local:   http://localhost:5177/
+  ➜  Network: use --host to expose

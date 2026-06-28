@@ -30,11 +30,13 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'accounts',
+    'accounts_api',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -63,7 +65,9 @@ TEMPLATES = [
     },
 ]
 
-# Single database — this is the shared auth_db
+# Primary auth database — source of truth for all users
+_DB_CONN = {'CONN_MAX_AGE': 60, 'CONN_HEALTH_CHECKS': True}
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -72,7 +76,28 @@ DATABASES = {
         'PASSWORD': config('AUTH_DB_PASSWORD', default=''),
         'HOST': config('AUTH_DB_HOST', default='localhost'),
         'PORT': config('AUTH_DB_PORT', default='5432'),
-    }
+        **_DB_CONN,
+    },
+    # Shadow connections — auth service writes user changes here so portals
+    # always have up-to-date FK-resolvable copies without cross-DB joins.
+    'public_shadow': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('PUBLIC_DB_NAME', default='gile_public'),
+        'USER': config('PUBLIC_DB_USER', default='postgres'),
+        'PASSWORD': config('PUBLIC_DB_PASSWORD', default=''),
+        'HOST': config('PUBLIC_DB_HOST', default='localhost'),
+        'PORT': config('PUBLIC_DB_PORT', default='5432'),
+        **_DB_CONN,
+    },
+    'internal_shadow': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': config('INTERNAL_DB_NAME', default='gile_internal'),
+        'USER': config('INTERNAL_DB_USER', default='postgres'),
+        'PASSWORD': config('INTERNAL_DB_PASSWORD', default=''),
+        'HOST': config('INTERNAL_DB_HOST', default='localhost'),
+        'PORT': config('INTERNAL_DB_PORT', default='5432'),
+        **_DB_CONN,
+    },
 }
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
@@ -90,6 +115,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
+STATIC_ROOT = config('STATIC_ROOT', default=str(BASE_DIR / 'staticfiles'))
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
@@ -117,7 +143,7 @@ _PRIVATE_KEY_PATH = config('JWT_PRIVATE_KEY_PATH', default=str(BASE_DIR.parent /
 _PUBLIC_KEY_PATH  = config('JWT_PUBLIC_KEY_PATH',  default=str(BASE_DIR.parent / 'keys' / 'public.pem'))
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME':    timedelta(minutes=60),
+    'ACCESS_TOKEN_LIFETIME':    timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME':   timedelta(days=30),
     'ROTATE_REFRESH_TOKENS':    True,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -145,3 +171,11 @@ CSRF_TRUSTED_ORIGINS = config(
     default='http://localhost:5173,http://127.0.0.1:5173',
     cast=lambda v: [s.strip() for s in v.split(',')],
 )
+
+REDIS_URL = config('REDIS_URL', default='redis://127.0.0.1:6379/2')
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': REDIS_URL,
+    }
+}

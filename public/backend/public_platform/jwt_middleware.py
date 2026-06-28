@@ -15,7 +15,7 @@ def _get_user_from_token(token_str):
         from django.conf import settings
         backend = TokenBackend(
             algorithm=settings.SIMPLE_JWT['ALGORITHM'],
-            signing_key=settings.SIMPLE_JWT['SIGNING_KEY'],
+            signing_key=settings.SIMPLE_JWT['VERIFYING_KEY'],
         )
         data = backend.decode(token_str, verify=True)
         return User.objects.get(id=data['user_id'])

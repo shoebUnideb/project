@@ -22,8 +22,12 @@ ALLOWED_HOSTS = config(
 )
 
 INSTALLED_APPS = [
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.sessions',
+    'django.contrib.messages',
+    'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
@@ -36,9 +40,12 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -53,7 +60,10 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
             ],
         },
     },
@@ -62,6 +72,8 @@ TEMPLATES = [
 # ── Databases ─────────────────────────────────────────────────────────────────
 # default → gile_public (core models)
 # auth_db → gile_auth  (accounts + token_blacklist, shared with auth-service)
+_DB_CONN = {'CONN_MAX_AGE': 60, 'CONN_HEALTH_CHECKS': True}
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -70,6 +82,7 @@ DATABASES = {
         'PASSWORD': config('PUBLIC_DB_PASSWORD', default=''),
         'HOST': config('PUBLIC_DB_HOST', default='localhost'),
         'PORT': config('PUBLIC_DB_PORT', default='5432'),
+        **_DB_CONN,
     },
     'auth_db': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -78,6 +91,7 @@ DATABASES = {
         'PASSWORD': config('AUTH_DB_PASSWORD', default=''),
         'HOST': config('AUTH_DB_HOST', default='localhost'),
         'PORT': config('AUTH_DB_PORT', default='5432'),
+        **_DB_CONN,
     },
 }
 
@@ -88,7 +102,12 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 # ── Channels ─────────────────────────────────────────────────────────────────
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [config('REDIS_URL', default='redis://127.0.0.1:6379/0')],
+            'capacity': 1500,
+            'expiry': 10,
+        },
     }
 }
 
@@ -101,6 +120,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = config('MEDIA_ROOT', default=str(BASE_DIR.parent / 'media'))
 
 STATIC_URL = '/static/'
+STATIC_ROOT = config('STATIC_ROOT', default=str(BASE_DIR / 'staticfiles'))
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ── DRF + JWT ────────────────────────────────────────────────────────────────
