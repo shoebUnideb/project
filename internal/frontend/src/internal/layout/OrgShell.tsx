@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import OrgTopbar from './OrgTopbar';
 import OrgSidebar from './OrgSidebar';
 import { OrgProvider } from '../context/OrgContext';
 import OrgFooter from '../components/OrgFooter';
+import { orgApi } from '../api/orgApi';
+import { useAuth } from '../../context/AuthContext';
 
 export const SIDEBAR_W_OPEN     = 220;
 export const SIDEBAR_W_COLLAPSED = 56;
@@ -11,6 +13,18 @@ export const SIDEBAR_W_COLLAPSED = 56;
 export default function OrgShell() {
   const [collapsed, setCollapsed] = useState(false);
   const sidebarW = collapsed ? SIDEBAR_W_COLLAPSED : SIDEBAR_W_OPEN;
+  const { patchUser } = useAuth();
+
+  useEffect(() => {
+    orgApi.getMe().then(me => {
+      if (!me) return;
+      orgApi.getMemberProfile(me.id).then(profile => {
+        if (profile?.user?.profile_picture) {
+          patchUser({ profile_picture: profile.user.profile_picture });
+        }
+      }).catch(() => {});
+    }).catch(() => {});
+  }, []);
 
   return (
     <OrgProvider>

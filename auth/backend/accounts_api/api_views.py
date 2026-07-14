@@ -1,12 +1,15 @@
+import time
+
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework_simplejwt.exceptions import TokenError
 from django_ratelimit.core import is_ratelimited
 
@@ -110,6 +113,17 @@ def api_logout(request):
             token = RefreshToken(refresh_token)
             token.blacklist()
         except TokenError:
+            pass
+    # Revoke the access token immediately so portals reject it before it expires
+    auth_header = request.headers.get('Authorization', '')
+    if auth_header.startswith('Bearer '):
+        raw_access = auth_header[7:]
+        try:
+            access = AccessToken(raw_access)
+            remaining = max(int(access['exp'] - time.time()), 0)
+            if remaining > 0:
+                cache.set(f'revoked:{access["jti"]}', 1, timeout=remaining)
+        except Exception:
             pass
     return Response({'detail': 'Logged out.'})
 

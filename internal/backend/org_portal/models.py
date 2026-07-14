@@ -12,8 +12,6 @@ class InternalRole(models.Model):
                                  )
     can_manage_members         = models.BooleanField(default=False)
     can_view_all_contributions = models.BooleanField(default=False)
-    can_approve_checkins       = models.BooleanField(default=False)
-    can_upload_agreements      = models.BooleanField(default=False)
     created_at                 = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -102,6 +100,7 @@ class OrgMember(models.Model):
     emergency_contact_name  = models.CharField(max_length=200, blank=True)
     emergency_contact_phone = models.CharField(max_length=50, blank=True)
     profile_completion_pct  = models.PositiveSmallIntegerField(default=0)
+    profile_picture         = models.ImageField(upload_to='org_members/pictures/', null=True, blank=True)
 
     class Meta:
         ordering = ['-joined_date']

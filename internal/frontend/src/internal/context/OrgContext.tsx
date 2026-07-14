@@ -10,7 +10,6 @@ interface OrgContextValue {
   isSuperadmin: boolean;
   canManageMembers: boolean;
   canViewAllContributions: boolean;
-  canApproveCheckins: boolean;
 }
 
 const OrgContext = createContext<OrgContextValue | null>(null);
@@ -50,7 +49,6 @@ export function OrgProvider({ children }: { children: ReactNode }) {
       isSuperadmin,
       canManageMembers:         isSuperadmin || !!orgMember?.role.can_manage_members,
       canViewAllContributions:  isSuperadmin || !!orgMember?.role.can_view_all_contributions,
-      canApproveCheckins:       isSuperadmin || !!orgMember?.role.can_approve_checkins,
     }}>
       {children}
     </OrgContext.Provider>

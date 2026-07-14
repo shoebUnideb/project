@@ -27,7 +27,7 @@ export default function AuthCallbackPage() {
         tokens.set(data.access, data.refresh);
         // Clear the code from URL so it can't be replayed
         window.history.replaceState(null, '', window.location.pathname);
-        navigate('/org/dashboard', { replace: true });
+        navigate('/org/onboarding', { replace: true });
       })
       .catch(err => {
         setError(err.message);

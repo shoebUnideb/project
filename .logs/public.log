@@ -1,4 +1,0 @@
-2026-06-28 03:59:14,638 INFO     Starting server at tcp:port=8002:interface=127.0.0.1
-2026-06-28 03:59:14,638 INFO     HTTP/2 support not enabled (install the http2 and tls Twisted extras)
-2026-06-28 03:59:14,638 INFO     Configuring endpoint tcp:port=8002:interface=127.0.0.1
-2026-06-28 03:59:14,639 INFO     Listening on TCP address 127.0.0.1:8002

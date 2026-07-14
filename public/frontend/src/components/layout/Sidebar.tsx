@@ -73,10 +73,10 @@ function WorkspacesNavItem({ item, isActive }: { item: NavItem; isActive: boolea
         to={item.to}
         className={[
           'flex items-center gap-2.5 px-2.5 py-1 rounded-md text-[12.5px] font-medium transition-colors',
-          isActive ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/[0.12] hover:text-white',
+          isActive ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
         ].join(' ')}
       >
-        <span className="shrink-0 opacity-80">{item.icon}</span>
+        <span className="shrink-0">{item.icon}</span>
         <span className="flex-1">{item.label}</span>
         {joined.length > 0 && <ChevronRight size={12} className="opacity-50" />}
       </NavLink>
@@ -150,13 +150,13 @@ export default function Sidebar({ width }: { width?: number }) {
 
   return (
     <aside
-      className="fixed top-10 bottom-0 left-0 z-20 flex flex-col bg-primary-600 overflow-hidden"
+      className="fixed top-10 bottom-0 left-0 z-20 flex flex-col bg-white border-r border-gray-200 overflow-hidden"
       style={{ width: width ?? 240 }}
     >
 
       {/* Role label */}
       <div className="px-4 py-2.5">
-        <span className="text-[10.5px] font-semibold uppercase tracking-widest text-white/60">
+        <span className="text-[10.5px] font-semibold uppercase tracking-widest text-gray-400">
           {ROLE_LABEL[user.role]}
         </span>
       </div>
@@ -176,25 +176,25 @@ export default function Sidebar({ width }: { width?: number }) {
             className={({ isActive }) =>
               [
                 'flex items-center gap-2.5 px-2.5 py-1 rounded-md text-[12.5px] font-medium transition-colors',
-                isActive ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/[0.12] hover:text-white',
+                isActive ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
               ].join(' ')
             }
           >
-            <span className="shrink-0 opacity-80">{item.icon}</span>
+            <span className="shrink-0">{item.icon}</span>
             {item.label}
           </NavLink>
         ))}
       </nav>
 
       {/* Footer */}
-      <div className="relative px-3.5 py-3 mb-2 bg-primary-700" data-appearance-root>
+      <div className="relative px-3.5 py-3 mb-2 bg-gray-50 border-t border-gray-100" data-appearance-root>
         <div className="flex items-center gap-2">
           <Avatar name={displayName} src={user.profile_picture ?? undefined} size="sm" />
-          <span className="text-[11.5px] text-white/70 truncate flex-1">{displayName}</span>
+          <span className="text-[11.5px] text-gray-600 truncate flex-1">{displayName}</span>
           <button
             onClick={() => setAppearanceOpen(o => !o)}
             title="Appearance settings"
-            className="shrink-0 p-1.5 rounded-lg text-white/50 hover:text-white hover:bg-white/[0.12] transition-colors"
+            className="shrink-0 p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
           >
             <Settings size={14} />
           </button>

@@ -465,33 +465,7 @@ export default function WorkspaceHome() {
       {/* ── RIGHT SIDEBAR ───────────────────────────────────────────────── */}
       <div className="w-[288px] shrink-0 space-y-4">
 
-        {/* 1 — Workspace overview (owner only) */}
-        {isOwner && (
-        <div className="bg-white rounded-xl border border-[#e0e0e0] p-5">
-          <p className="text-[15px] font-bold text-gray-900 mb-3.5">Workspace overview</p>
-          <div className="grid grid-cols-2 gap-2.5">
-            {([
-              { label: 'Members',       value: String(workspace.member_count),   iconBg: '#fdf3ec', iconFg: '#cf6535', icon: <Users size={16} />       },
-              { label: 'Resources',     value: String(workspace.resource_count), iconBg: '#f0fdf4', iconFg: '#22c55e', icon: <Folder size={16} />      },
-              { label: 'Tasks',         value: String(tasks.length),             iconBg: '#fffbeb', iconFg: '#f59e0b', icon: <CheckSquare size={16} /> },
-              { label: 'Last activity', value: lastActivityStr ?? '—',           iconBg: '#f5f3ff', iconFg: '#8b5cf6', icon: <Clock3 size={16} />      },
-            ] as const).map((tile, i) => (
-              <div key={i} className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
-                  style={{ background: tile.iconBg, color: tile.iconFg }}
-                >
-                  {tile.icon}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[18px] font-extrabold text-gray-900 leading-none truncate">{tile.value}</p>
-                  <p className="text-[10.5px] text-gray-400 font-medium mt-0.5">{tile.label}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        )}
+        {/* Workspace overview removed */}
 
         {/* 2 — Pinned posts */}
         {pinnedPosts.length > 0 && (

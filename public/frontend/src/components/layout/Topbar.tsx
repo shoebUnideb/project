@@ -175,19 +175,19 @@ export default function Topbar() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-30 h-10 bg-primary-600 flex items-center px-4 gap-3">
+      <header className="fixed top-0 left-0 right-0 z-30 h-10 bg-white border-b border-gray-200 flex items-center px-4 gap-3">
 
         {/* Brand + page context */}
         <Link to={homeRoute} className="hidden sm:flex items-center gap-2.5 shrink-0 self-stretch py-1">
-          <div className="bg-white rounded h-full flex items-center px-1.5">
+          <div className="h-full flex items-center px-1.5">
             <img src="/gile.png" alt="GILE Foundation" className="h-full w-auto" />
           </div>
-          <span className="text-[15px] font-bold text-white tracking-tight">GILE Foundation</span>
+          <span className="text-[15px] font-bold text-gray-900 tracking-tight">GILE Foundation</span>
         </Link>
         {pageLabel && (
           <>
-            <span className="text-white/30 text-[13px] select-none hidden sm:block">|</span>
-            <span className="text-[12.5px] text-white/70 hidden sm:block">{pageLabel}</span>
+            <span className="text-gray-300 text-[13px] select-none hidden sm:block">|</span>
+            <span className="text-[12.5px] text-gray-500 hidden sm:block">{pageLabel}</span>
           </>
         )}
 
@@ -199,11 +199,11 @@ export default function Topbar() {
           {/* Search */}
           <button
             onClick={() => setSearchOpen(true)}
-            className="flex items-center gap-2 px-3 py-1 text-[12px] text-white/70 border border-white/25 rounded-md hover:border-white/60 hover:text-white transition-colors w-[160px] md:w-[220px]"
+            className="flex items-center gap-2 px-3 py-1 text-[12px] text-gray-500 border border-gray-200 rounded-md hover:border-gray-400 hover:text-gray-800 transition-colors w-[160px] md:w-[220px]"
           >
             <Search size={12} className="shrink-0" />
             <span className="flex-1 text-left hidden md:block">Search pages...</span>
-            <kbd className="hidden md:inline text-[10px] bg-white/10 text-white/70 px-1 rounded font-mono leading-4">⌘K</kbd>
+            <kbd className="hidden md:inline text-[10px] bg-gray-100 text-gray-500 px-1 rounded font-mono leading-4">⌘K</kbd>
           </button>
 
           {/* Apps switcher */}
@@ -213,11 +213,11 @@ export default function Topbar() {
           <div ref={notifRef} className="relative">
             <button
               onClick={handleBellClick}
-              className="relative p-2 rounded-md text-white/70 hover:bg-white/[0.12] hover:text-white transition-colors"
+              className="relative p-2 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors"
             >
               <Bell size={15} />
               {unread > 0 && (
-                <span className="absolute top-1 right-1 min-w-[14px] h-3.5 px-0.5 bg-rose-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center ring-2 ring-primary-600">
+                <span className="absolute top-1 right-1 min-w-[14px] h-3.5 px-0.5 bg-rose-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
                   {unread > 9 ? '9+' : unread}
                 </span>
               )}
@@ -332,7 +332,7 @@ export default function Topbar() {
           <div ref={dropdownRef} className="relative">
             <button
               onClick={() => { setDropdownOpen(p => !p); setNotifOpen(false); }}
-              className="flex items-center gap-1 pl-1 pr-1.5 py-1 rounded-md hover:bg-white/[0.12] transition-colors"
+              className="flex items-center gap-1 pl-1 pr-1.5 py-1 rounded-md hover:bg-gray-100 transition-colors"
             >
               {user?.profile_picture ? (
                 <img
@@ -345,7 +345,7 @@ export default function Topbar() {
                   {initials}
                 </div>
               )}
-              <ChevronDown size={11} className="text-white/70" />
+              <ChevronDown size={11} className="text-gray-400" />
             </button>
 
             {dropdownOpen && (

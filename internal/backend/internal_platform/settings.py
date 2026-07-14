@@ -14,7 +14,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ── Security ─────────────────────────────────────────────────────────────────
 # Must match auth-service SECRET_KEY (same HS256 signing secret in Phase 3)
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-production-use-env-var')
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
     default='127.0.0.1,localhost',
@@ -126,7 +126,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ── DRF + JWT ────────────────────────────────────────────────────────────────
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'internal_platform.authentication.RevokedTokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -147,7 +147,7 @@ def _read_key(path):
 _PUBLIC_KEY_PATH = config('JWT_PUBLIC_KEY_PATH', default=str(BASE_DIR.parent / 'keys' / 'public.pem'))
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME':    timedelta(minutes=60),
+    'ACCESS_TOKEN_LIFETIME':    timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME':   timedelta(days=30),
     'ROTATE_REFRESH_TOKENS':    True,
     'BLACKLIST_AFTER_ROTATION': True,
@@ -158,6 +158,15 @@ SIMPLE_JWT = {
     'USER_ID_FIELD':            'id',
     'USER_ID_CLAIM':            'user_id',
     # No TOKEN_OBTAIN_SERIALIZER — login lives exclusively on auth-service
+}
+
+# ── Cache (shared with auth-service for token revocation) ────────────────────
+CACHE_REDIS_URL = config('CACHE_REDIS_URL', default='redis://127.0.0.1:6379/2')
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': CACHE_REDIS_URL,
+    }
 }
 
 # ── CORS ─────────────────────────────────────────────────────────────────────

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from .upload_validators import validate_image, validate_document, validate_attachment
 from .models import (
     StudentProfile, MentorProfile, Assignment,
     Message, Workspace, WorkspaceMembership, WorkspaceResource,
@@ -40,6 +41,11 @@ class StudentProfileSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'user', 'created_at', 'updated_at']
 
+    def validate_profile_picture(self, value):
+        if value:
+            return validate_image(value)
+        return value
+
 
 class MentorProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -65,6 +71,11 @@ class MentorProfileSerializer(serializers.ModelSerializer):
             'created_at', 'updated_at',
         ]
         read_only_fields = ['id', 'user', 'created_at', 'updated_at']
+
+    def validate_profile_picture(self, value):
+        if value:
+            return validate_image(value)
+        return value
 
 
 class AssignmentSerializer(serializers.ModelSerializer):
@@ -96,6 +107,11 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = ['id', 'sender', 'receiver', 'receiver_id', 'body', 'attachment', 'timestamp', 'is_read']
         read_only_fields = ['id', 'sender', 'receiver', 'timestamp', 'is_read']
+
+    def validate_attachment(self, value):
+        if value:
+            return validate_attachment(value)
+        return value
 
 
 # ── Workspace serializers ───────────────────────
@@ -217,6 +233,11 @@ class WorkspaceResourceSerializer(serializers.ModelSerializer):
                   'url', 'body', 'posted_by', 'is_template', 'is_hidden', 'is_featured', 'created_at']
         read_only_fields = ['id', 'posted_by', 'created_at', 'file_url', 'file_size']
 
+    def validate_file(self, value):
+        if value:
+            return validate_document(value)
+        return value
+
     def get_file_url(self, obj):
         if obj.file:
             return obj.file.url
@@ -305,6 +326,11 @@ class WorkspaceTaskDocumentSerializer(serializers.ModelSerializer):
         model  = WorkspaceTaskDocument
         fields = ['id', 'uploaded_by', 'title', 'file', 'file_url', 'created_at']
         read_only_fields = ['id', 'uploaded_by', 'file_url', 'created_at']
+
+    def validate_file(self, value):
+        if value:
+            return validate_document(value)
+        return value
 
     def get_file_url(self, obj):
         if obj.file:

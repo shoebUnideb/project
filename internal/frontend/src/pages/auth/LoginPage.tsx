@@ -31,7 +31,7 @@ export default function LoginPage() {
       setError(result.error ?? 'Login failed.');
       return;
     }
-    navigate('/org/dashboard', { replace: true });
+    navigate('/org/onboarding', { replace: true });
   };
 
   return (

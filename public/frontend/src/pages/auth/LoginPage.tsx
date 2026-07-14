@@ -265,22 +265,24 @@ export default function LoginPage() {
                 </button>
               </form>
 
-              <div className="mt-8 pt-6 border-t border-gray-100">
-                <p className="text-[10.5px] font-bold uppercase tracking-widest text-gray-300 mb-3">
-                  Dev quick-login
-                </p>
-                <div className="flex gap-2 flex-wrap">
-                  {QUICK_LOGINS.map(q => (
-                    <button
-                      key={q.role}
-                      onClick={() => { setUsername(q.username); setPassword('any'); }}
-                      className="px-3 py-1.5 text-[11px] font-semibold rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300 transition-colors"
-                    >
-                      {q.label}
-                    </button>
-                  ))}
+              {import.meta.env.DEV && (
+                <div className="mt-8 pt-6 border-t border-gray-100">
+                  <p className="text-[10.5px] font-bold uppercase tracking-widest text-gray-300 mb-3">
+                    Dev quick-login
+                  </p>
+                  <div className="flex gap-2 flex-wrap">
+                    {QUICK_LOGINS.map(q => (
+                      <button
+                        key={q.role}
+                        onClick={() => { setUsername(q.username); setPassword('any'); }}
+                        className="px-3 py-1.5 text-[11px] font-semibold rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300 transition-colors"
+                      >
+                        {q.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
 
             </div>
           </div>

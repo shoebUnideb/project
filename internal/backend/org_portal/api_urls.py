@@ -9,6 +9,7 @@ from .api_views import (
     OrgMemberDetailView,
     OrgMembersExportView,
     MemberProfileView,
+    MemberPictureView,
     OrgMeView,
     OrgUserSearchView,
     OrgNotificationListView,
@@ -145,6 +146,7 @@ urlpatterns = [
     path('org/members/',                                   OrgMemberListView.as_view()),
     path('org/members/<int:pk>/',                          OrgMemberDetailView.as_view()),
     path('org/members/<int:pk>/profile/',                  MemberProfileView.as_view()),
+    path('org/members/<int:pk>/picture/',                  MemberPictureView.as_view()),
     path('org/members/<int:pk>/training/',                 MemberTrainingView.as_view()),
     # Current user
     path('org/me/',                                        OrgMeView.as_view()),

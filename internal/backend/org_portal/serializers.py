@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
+from .upload_validators import validate_image, validate_document, validate_lesson_content
 from .models import (
     InternalRole, OrgMember, Department,
     OnboardingTemplate, TaskTemplateItem,
@@ -33,7 +34,6 @@ class InternalRoleSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'level',
             'can_manage_members', 'can_view_all_contributions',
-            'can_approve_checkins', 'can_upload_agreements',
             'member_count', 'created_at',
         ]
         read_only_fields = ['id', 'created_at', 'member_count']
@@ -101,6 +101,12 @@ class OrgMemberUserSerializer(serializers.ModelSerializer):
 
     def get_profile_picture(self, obj):
         request = self.context.get('request')
+        try:
+            if hasattr(obj, 'org_member') and obj.org_member.profile_picture:
+                pic = obj.org_member.profile_picture
+                return request.build_absolute_uri(pic.url) if request else pic.url
+        except Exception:
+            pass
         pic = None
         try:
             if hasattr(obj, 'student_profile') and obj.student_profile.profile_picture:
@@ -113,7 +119,7 @@ class OrgMemberUserSerializer(serializers.ModelSerializer):
                     pic = obj.mentor_profile.profile_picture
             except Exception:
                 pass
-        return pic.url if pic else None
+        return (request.build_absolute_uri(pic.url) if request else pic.url) if pic else None
 
     def get_display_name(self, obj):
         full = f"{obj.first_name or ''} {obj.last_name or ''}".strip()
@@ -141,12 +147,20 @@ class OrgMemberLiteSerializer(serializers.ModelSerializer):
 
     def get_profile_picture(self, obj):
         request = self.context.get('request')
+        if obj.profile_picture:
+            return request.build_absolute_uri(obj.profile_picture.url) if request else obj.profile_picture.url
         pic = None
         if obj.user.role == 'student' and hasattr(obj.user, 'student_profile'):
-            pic = obj.user.student_profile.profile_picture
+            try:
+                pic = obj.user.student_profile.profile_picture
+            except Exception:
+                pass
         elif obj.user.role == 'mentor' and hasattr(obj.user, 'mentor_profile'):
-            pic = obj.user.mentor_profile.profile_picture
-        return pic.url if pic else None
+            try:
+                pic = obj.user.mentor_profile.profile_picture
+            except Exception:
+                pass
+        return (request.build_absolute_uri(pic.url) if request else pic.url) if pic else None
 
 
 class OrgMemberSerializer(serializers.ModelSerializer):
@@ -307,6 +321,11 @@ class TaskTemplateItemSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'content_file_url']
         extra_kwargs = {'content_file': {'write_only': True, 'required': False}}
 
+    def validate_content_file(self, value):
+        if value:
+            return validate_document(value)
+        return value
+
     def get_content_file_url(self, obj):
         if not obj.content_file:
             return None
@@ -434,6 +453,11 @@ class TaskCommentSerializer(serializers.ModelSerializer):
 
     def get_author_picture(self, obj):
         u = obj.author
+        try:
+            if hasattr(u, 'org_member') and u.org_member.profile_picture:
+                return u.org_member.profile_picture.url
+        except Exception:
+            pass
         pic = None
         if u.role == 'student' and hasattr(u, 'student_profile'):
             pic = u.student_profile.profile_picture
@@ -543,6 +567,11 @@ class DocumentTemplateSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at', 'department_name', 'created_by_name', 'file_url', 'used_in_count']
         extra_kwargs = {'file': {'write_only': True, 'required': False}}
+
+    def validate_file(self, value):
+        if value:
+            return validate_document(value)
+        return value
 
     def get_department_name(self, obj):
         return obj.department.name if obj.department else None
@@ -701,6 +730,11 @@ class TrainingLessonSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {'content_file': {'write_only': True, 'required': False}}
 
+    def validate_content_file(self, value):
+        if value:
+            return validate_lesson_content(value)
+        return value
+
     def get_content_file_url(self, obj):
         if not obj.content_file:
             return None
@@ -769,6 +803,11 @@ class TrainingCourseSerializer(serializers.ModelSerializer):
             'total_duration',
         ]
         extra_kwargs = {'thumbnail': {'write_only': True, 'required': False}}
+
+    def validate_thumbnail(self, value):
+        if value:
+            return validate_image(value)
+        return value
 
     def get_department_name(self, obj):
         return obj.department.name if obj.department else None
@@ -867,6 +906,11 @@ class TrainingEnrollmentSerializer(serializers.ModelSerializer):
         return obj.user_id
 
     def get_user_picture(self, obj):
+        try:
+            if hasattr(obj.user, 'org_member') and obj.user.org_member.profile_picture:
+                return obj.user.org_member.profile_picture.url
+        except Exception:
+            pass
         try:
             if hasattr(obj.user, 'student_profile') and obj.user.student_profile.profile_picture:
                 return obj.user.student_profile.profile_picture.url
@@ -1017,6 +1061,11 @@ class ContributionSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {'evidence_file': {'write_only': True, 'required': False}}
 
+    def validate_evidence_file(self, value):
+        if value:
+            return validate_document(value)
+        return value
+
     def get_member_name(self, obj):
         return obj.member.user.get_full_name() or obj.member.user.email
 
@@ -1071,6 +1120,11 @@ class ResourceSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'created_by_name', 'created_at']
         extra_kwargs = {'file': {'write_only': True, 'required': False}}
 
+    def validate_file(self, value):
+        if value:
+            return validate_document(value)
+        return value
+
     def get_file_url(self, obj):
         if not obj.file:
             return None
@@ -1119,6 +1173,11 @@ class OrgSettingsSerializer(serializers.ModelSerializer):
         read_only_fields = ['id', 'updated_at']
         extra_kwargs = {'logo': {'write_only': True, 'required': False}}
 
+    def validate_logo(self, value):
+        if value:
+            return validate_image(value)
+        return value
+
     def get_logo_url(self, obj):
         if not obj.logo:
             return None
@@ -1142,6 +1201,11 @@ class OrgAgreementSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['id', 'created_at']
         extra_kwargs = {'file': {'write_only': True, 'required': False}}
+
+    def validate_file(self, value):
+        if value:
+            return validate_document(value)
+        return value
 
     def get_file_url(self, obj):
         if not obj.file:
@@ -1347,6 +1411,11 @@ class _OrgChatSenderSerializer(serializers.ModelSerializer):
         return f"{obj.first_name} {obj.last_name}".strip() or obj.username
 
     def get_profile_picture(self, obj):
+        try:
+            if hasattr(obj, 'org_member') and obj.org_member.profile_picture:
+                return obj.org_member.profile_picture.url
+        except Exception:
+            pass
         try:
             if hasattr(obj, 'student_profile') and obj.student_profile.profile_picture:
                 return obj.student_profile.profile_picture.url

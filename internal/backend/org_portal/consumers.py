@@ -1,6 +1,9 @@
 import json
+import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+
+logger = logging.getLogger(__name__)
 
 
 # ── DB helpers ─────────────────────────────────────────────────────────────
@@ -79,6 +82,12 @@ def _toggle_org_reaction(user, message_pk, emoji):
 
 def _get_org_user_pic(user):
     try:
+        org_member = user.org_member
+        if org_member.profile_picture:
+            return org_member.profile_picture.url
+    except Exception:
+        pass
+    try:
         if hasattr(user, 'student_profile') and user.student_profile.profile_picture:
             return user.student_profile.profile_picture.url
     except Exception:
@@ -104,7 +113,7 @@ def _serialize_org_msg(msg):
                                 or rt.sender.username),
             }
         except Exception:
-            pass
+            logger.debug('Failed to serialize reply_to %s for message %s', msg.reply_to_id, msg.id, exc_info=True)
     reactions = list(msg.reactions.select_related('user').all()) if msg.pk else []
     return {
         'id':           msg.id,
@@ -187,6 +196,8 @@ class OrgChatConsumer(AsyncWebsocketConsumer):
         try:
             data = json.loads(text_data)
         except (json.JSONDecodeError, TypeError):
+            logger.warning('OrgChatConsumer: invalid JSON from user %s in ch=%s',
+                           self.scope['user'].id, self.cid)
             return
         event_type = data.get('type')
         user = self.scope['user']
@@ -201,6 +212,8 @@ class OrgChatConsumer(AsyncWebsocketConsumer):
                 data.get('reply_to_id'),
             )
             if not msg:
+                logger.warning('OrgChatConsumer: message save failed (ch=%s user=%s)',
+                               self.cid, user.id)
                 return
             await self.channel_layer.group_send(
                 self.group, {'type': 'chat.message', 'payload': msg}
@@ -253,6 +266,8 @@ class OrgDMConsumer(AsyncWebsocketConsumer):
         try:
             data = json.loads(text_data)
         except (json.JSONDecodeError, TypeError):
+            logger.warning('OrgDMConsumer: invalid JSON from user %s',
+                           self.scope['user'].id)
             return
         if data.get('type') != 'message':
             return
@@ -261,6 +276,8 @@ class OrgDMConsumer(AsyncWebsocketConsumer):
             return
         msg = await _save_org_dm(self.scope['user'], self.other_id, body)
         if not msg:
+            logger.warning('OrgDMConsumer: DM save failed (sender=%s receiver=%s)',
+                           self.scope['user'].id, self.other_id)
             return
         await self.channel_layer.group_send(
             self.group, {'type': 'dm.message', 'payload': msg}

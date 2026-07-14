@@ -6,8 +6,6 @@ import { orgApi, type InternalRole } from '../api/orgApi';
 const PERM_LABELS: { key: keyof InternalRole; label: string }[] = [
   { key: 'can_manage_members',         label: 'Manage members' },
   { key: 'can_view_all_contributions', label: 'View all contributions' },
-  { key: 'can_approve_checkins',       label: 'Approve check-ins' },
-  { key: 'can_upload_agreements',      label: 'Upload agreements' },
 ];
 
 // ── Role Form (create / edit) ─────────────────────────────────────────────────
@@ -17,16 +15,12 @@ interface RoleFormState {
   level: number;
   can_manage_members: boolean;
   can_view_all_contributions: boolean;
-  can_approve_checkins: boolean;
-  can_upload_agreements: boolean;
 }
 
 const EMPTY_FORM: RoleFormState = {
   name: '', level: 1,
   can_manage_members: false,
   can_view_all_contributions: false,
-  can_approve_checkins: false,
-  can_upload_agreements: false,
 };
 
 function RoleModal({ initial, onClose, onSaved }: {
@@ -39,8 +33,6 @@ function RoleModal({ initial, onClose, onSaved }: {
     level: initial.level,
     can_manage_members: initial.can_manage_members,
     can_view_all_contributions: initial.can_view_all_contributions,
-    can_approve_checkins: initial.can_approve_checkins,
-    can_upload_agreements: initial.can_upload_agreements,
   } : EMPTY_FORM);
   const [saving, setSaving]     = useState(false);
   const [error, setError]       = useState('');

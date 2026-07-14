@@ -11,7 +11,7 @@ from decouple import config
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-production-use-env-var')
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config(
     'ALLOWED_HOSTS',
     default='127.0.0.1,localhost',
@@ -143,7 +143,7 @@ _PRIVATE_KEY_PATH = config('JWT_PRIVATE_KEY_PATH', default=str(BASE_DIR.parent /
 _PUBLIC_KEY_PATH  = config('JWT_PUBLIC_KEY_PATH',  default=str(BASE_DIR.parent / 'keys' / 'public.pem'))
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME':    timedelta(minutes=15),
+    'ACCESS_TOKEN_LIFETIME':    timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME':   timedelta(days=30),
     'ROTATE_REFRESH_TOKENS':    True,
     'BLACKLIST_AFTER_ROTATION': True,

@@ -8,8 +8,6 @@ export interface InternalRole {
   level: number;
   can_manage_members: boolean;
   can_view_all_contributions: boolean;
-  can_approve_checkins: boolean;
-  can_upload_agreements: boolean;
   member_count: number;
   created_at: string;
 }
@@ -307,6 +305,14 @@ export const orgApi = {
     manager_id: number | null;
   }>) =>
     apiClient.patch<OrgMemberProfile>(`/api/org/members/${id}/profile/`, data),
+
+  uploadMemberPicture: (id: number, file: File) => {
+    const fd = new FormData();
+    fd.append('picture', file);
+    return apiClient.postForm<{ profile_picture: string }>(`/api/org/members/${id}/picture/`, fd);
+  },
+  deleteMemberPicture: (id: number) =>
+    apiClient.delete(`/api/org/members/${id}/picture/`),
 
   // Member Fingerprint
   getMemberTraining: (memberId: number) =>

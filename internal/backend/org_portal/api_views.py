@@ -7,6 +7,7 @@ from django.db.models.functions import TruncWeek
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 
 
@@ -125,7 +126,6 @@ def _notify_admins(notif_type, title, body='', link='', permission='manage'):
     perm_filter = {
         'manage':        {'role__can_manage_members': True},
         'contributions': {'role__can_view_all_contributions': True},
-        'checkins':      {'role__can_approve_checkins': True},
     }.get(permission, {'role__can_manage_members': True})
     for m in OrgMember.objects.filter(status='active', **perm_filter).select_related('user'):
         if m.user.pk not in notified:
@@ -472,8 +472,11 @@ class MemberProfileView(APIView):
             return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
         if not self._can_access(request, member):
             return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+        data = request.data.copy()
+        if not can_manage(request.user):
+            data.pop('employee_id', None)
         serializer = OrgMemberProfileSerializer(
-            member, data=request.data, partial=True, context={'request': request}
+            member, data=data, partial=True, context={'request': request}
         )
         if serializer.is_valid():
             serializer.save()
@@ -483,6 +486,48 @@ class MemberProfileView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class MemberPictureView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes     = [MultiPartParser, FormParser]
+
+    def _get_own_member(self, request, pk):
+        try:
+            member = OrgMember.objects.get(pk=pk)
+        except OrgMember.DoesNotExist:
+            return None
+        if can_manage(request.user) or member.user_id == request.user.id:
+            return member
+        return None
+
+    def post(self, request, pk):
+        member = self._get_own_member(request, pk)
+        if not member:
+            return Response({'detail': 'Not found or permission denied.'}, status=status.HTTP_404_NOT_FOUND)
+        file = request.FILES.get('picture')
+        if not file:
+            return Response({'detail': 'No file provided.'}, status=status.HTTP_400_BAD_REQUEST)
+        if file.size > 5 * 1024 * 1024:
+            return Response({'detail': 'File too large. Maximum 5 MB.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not file.content_type.startswith('image/'):
+            return Response({'detail': 'File must be an image.'}, status=status.HTTP_400_BAD_REQUEST)
+        if member.profile_picture:
+            member.profile_picture.delete(save=False)
+        member.profile_picture = file
+        member.save(update_fields=['profile_picture'])
+        url = request.build_absolute_uri(member.profile_picture.url)
+        return Response({'profile_picture': url}, status=status.HTTP_200_OK)
+
+    def delete(self, request, pk):
+        member = self._get_own_member(request, pk)
+        if not member:
+            return Response({'detail': 'Not found or permission denied.'}, status=status.HTTP_404_NOT_FOUND)
+        if member.profile_picture:
+            member.profile_picture.delete(save=False)
+            member.profile_picture = None
+            member.save(update_fields=['profile_picture'])
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 # ── Current user ──────────────────────────────────────────────────────────────
 
 class OrgMeView(APIView):
@@ -490,7 +535,7 @@ class OrgMeView(APIView):
 
     def get(self, request):
         if not hasattr(request.user, 'org_member'):
-            return Response({'detail': 'Not an org member.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response(None, status=status.HTTP_200_OK)
         member = OrgMember.objects.select_related(
             'role', 'department', 'buddy__user', 'manager__user'
         ).get(user=request.user)
@@ -515,19 +560,13 @@ class OrgUserSearchView(APIView):
                 Q(last_name__icontains=q) |
                 Q(email__icontains=q)
             )
-            .exclude(has_internal_access=True)
+            .exclude(id__in=list(OrgMember.objects.values_list('user_id', flat=True)))
             .exclude(role='superadmin')
-            .select_related('student_profile', 'mentor_profile')
             [:10]
         )
 
         results = []
         for u in users:
-            pic = None
-            if u.role == 'student' and hasattr(u, 'student_profile'):
-                pic = u.student_profile.profile_picture
-            elif u.role == 'mentor' and hasattr(u, 'mentor_profile'):
-                pic = u.mentor_profile.profile_picture
             display_name = f"{u.first_name or ''} {u.last_name or ''}".strip() or u.username
             results.append({
                 'user_id':      u.id,
@@ -535,7 +574,7 @@ class OrgUserSearchView(APIView):
                 'email':        u.email,
                 'display_name': display_name,
                 'role':         u.role,
-                'avatar_url':   pic.url if pic else None,
+                'avatar_url':   None,
             })
 
         return Response(results)

@@ -876,32 +876,7 @@ export default function WorkspaceMembersPage() {
         </div>
       )}
 
-      {/* Stats bar — owner only */}
-      {isOwner && (
-      <div className="grid grid-cols-3 gap-3 mb-5">
-        {[
-          { icon: <Users size={16} className="text-primary-600" />, bg: 'bg-primary-50', label: 'Total members', value: totalCount,
-            change: newThisMonth > 0 ? `↑ ${newThisMonth} this month` : 'No change', changeColor: newThisMonth > 0 ? 'text-green-600' : 'text-gray-400' },
-          { icon: <Shield size={16} className="text-primary-600" />, bg: 'bg-primary-50', label: 'Admins', value: 1,
-            change: 'No change', changeColor: 'text-gray-400' },
-          { icon: <Clock size={16} className="text-amber-600" />, bg: 'bg-amber-50', label: 'Pending invites', value: pending.length,
-            change: pending.length > 0 ? 'View all' : '—', changeColor: pending.length > 0 ? 'text-primary-600 cursor-pointer hover:underline' : 'text-gray-400',
-            onChangeClick: pending.length > 0 ? () => setTab('pending') : undefined },
-        ].map((stat, i) => (
-          <div key={i} className="bg-white border border-gray-200 rounded-xl p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <div className={`w-8 h-8 rounded-lg ${stat.bg} flex items-center justify-center`}>
-                {stat.icon}
-              </div>
-              <p className="text-[11.5px] text-gray-500 font-medium">{stat.label}</p>
-            </div>
-            <p className="text-[22px] font-bold text-gray-900 leading-none mb-1">{stat.value}</p>
-            <p className={`text-[11.5px] font-medium ${stat.changeColor}`}
-              onClick={stat.onChangeClick}>{stat.change}</p>
-          </div>
-        ))}
-      </div>
-      )}
+      {/* Stats bar removed */}
 
       {/* Main 2-column layout */}
       <div className="flex gap-5">

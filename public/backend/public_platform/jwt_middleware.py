@@ -3,6 +3,7 @@ from channels.middleware import BaseMiddleware
 from channels.db import database_sync_to_async
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.auth import get_user_model
+from django.core.cache import cache
 
 
 @database_sync_to_async
@@ -15,9 +16,12 @@ def _get_user_from_token(token_str):
         from django.conf import settings
         backend = TokenBackend(
             algorithm=settings.SIMPLE_JWT['ALGORITHM'],
-            signing_key=settings.SIMPLE_JWT['VERIFYING_KEY'],
+            signing_key=settings.SIMPLE_JWT.get('SIGNING_KEY'),
+            verifying_key=settings.SIMPLE_JWT['VERIFYING_KEY'],
         )
         data = backend.decode(token_str, verify=True)
+        if cache.get(f'revoked:{data.get("jti")}'):
+            return AnonymousUser()
         return User.objects.get(id=data['user_id'])
     except Exception:
         return AnonymousUser()

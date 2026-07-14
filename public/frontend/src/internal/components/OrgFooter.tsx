@@ -46,12 +46,12 @@ const MEMBER_RESOURCE_LINKS: FooterLink[] = [
 ];
 
 const COMPANY_LINKS: FooterLink[] = [
-  { icon: <Info    size={13} />, label: 'About GILE Foundation', to: '/org/dashboard' },
-  { icon: <Globe   size={13} />, label: 'Our Mission',           to: '/org/dashboard' },
-  { icon: <Lock    size={13} />, label: 'Privacy Policy',        to: '/org/dashboard' },
-  { icon: <FileText size={13}/>, label: 'Terms of Service',      to: '/org/dashboard' },
-  { icon: <FileText size={13}/>, label: 'Cookie Policy',         to: '/org/dashboard' },
-  { icon: <Shield  size={13} />, label: 'Data Security',         to: '/org/dashboard' },
+  { icon: <Info    size={13} />, label: 'About GILE Foundation', to: '/org/onboarding' },
+  { icon: <Globe   size={13} />, label: 'Our Mission',           to: '/org/onboarding' },
+  { icon: <Lock    size={13} />, label: 'Privacy Policy',        to: '/org/onboarding' },
+  { icon: <FileText size={13}/>, label: 'Terms of Service',      to: '/org/onboarding' },
+  { icon: <FileText size={13}/>, label: 'Cookie Policy',         to: '/org/onboarding' },
+  { icon: <Shield  size={13} />, label: 'Data Security',         to: '/org/onboarding' },
 ];
 
 function FooterCol({ heading, links }: { heading: string; links: FooterLink[] }) {

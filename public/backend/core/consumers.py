@@ -1,6 +1,9 @@
 import json
+import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
+
+logger = logging.getLogger(__name__)
 
 
 # ── DB helpers ─────────────────────────────────────────────────────────────
@@ -84,13 +87,13 @@ def _get_user_pic(user):
         if mp and mp.profile_picture:
             return mp.profile_picture.url
     except Exception:
-        pass
+        logger.debug('Failed to get mentor profile picture for user %s', user.id, exc_info=True)
     try:
         sp = getattr(user, 'student_profile', None)
         if sp and sp.profile_picture:
             return sp.profile_picture.url
     except Exception:
-        pass
+        logger.debug('Failed to get student profile picture for user %s', user.id, exc_info=True)
     return None
 
 
@@ -107,7 +110,7 @@ def _serialize_channel_msg(msg):
                                 or rt.sender.username),
             }
         except Exception:
-            pass
+            logger.debug('Failed to serialize reply_to %s for message %s', msg.reply_to_id, msg.id, exc_info=True)
     reactions = list(msg.reactions.select_related('user').all()) if msg.pk else []
     return {
         'id':           msg.id,
@@ -192,6 +195,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         try:
             data = json.loads(text_data)
         except (json.JSONDecodeError, TypeError):
+            logger.warning('ChatConsumer: invalid JSON from user %s in ws=%s ch=%s',
+                           self.scope['user'].id, self.pk, self.cid)
             return
         event_type = data.get('type')
         user = self.scope['user']
@@ -206,6 +211,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 data.get('reply_to_id'),
             )
             if not msg:
+                logger.warning('ChatConsumer: message save failed (ws=%s ch=%s user=%s)',
+                               self.pk, self.cid, user.id)
                 return
             await self.channel_layer.group_send(
                 self.group, {'type': 'chat.message', 'payload': msg}
@@ -258,6 +265,8 @@ class DMConsumer(AsyncWebsocketConsumer):
         try:
             data = json.loads(text_data)
         except (json.JSONDecodeError, TypeError):
+            logger.warning('DMConsumer: invalid JSON from user %s in ws=%s',
+                           self.scope['user'].id, self.pk)
             return
         if data.get('type') != 'message':
             return
@@ -266,6 +275,8 @@ class DMConsumer(AsyncWebsocketConsumer):
             return
         msg = await _save_dm_message(self.scope['user'], self.pk, self.other_id, body)
         if not msg:
+            logger.warning('DMConsumer: DM save failed (ws=%s sender=%s receiver=%s)',
+                           self.pk, self.scope['user'].id, self.other_id)
             return
         await self.channel_layer.group_send(
             self.group, {'type': 'dm.message', 'payload': msg}

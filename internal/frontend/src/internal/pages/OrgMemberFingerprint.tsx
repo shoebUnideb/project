@@ -262,10 +262,8 @@ function OverviewTab({ member, profile }: { member: OrgMember; profile: OrgMembe
   if (!profile) return <TabSkeleton />;
   const name = displayName(member);
   const perms = [
-    { label: 'Manage Members',       active: member.role.can_manage_members },
+    { label: 'Manage Members',        active: member.role.can_manage_members },
     { label: 'View All Contributions', active: member.role.can_view_all_contributions },
-    { label: 'Approve Check-ins',    active: member.role.can_approve_checkins },
-    { label: 'Upload Agreements',    active: member.role.can_upload_agreements },
   ];
 
   return (

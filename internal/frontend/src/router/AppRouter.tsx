@@ -31,6 +31,7 @@ import OrgMyForms       from '../internal/pages/OrgMyForms';
 import OrgChat          from '../internal/pages/OrgChat';
 import OrgDashboard      from '../internal/pages/OrgDashboard';
 import OrgAdminGuide     from '../internal/pages/OrgAdminGuide';
+import OrgProfilePage   from '../internal/pages/OrgProfilePage';
 
 export default function AppRouter() {
   return (
@@ -46,7 +47,7 @@ export default function AppRouter() {
           {/* ── Internal Portal ── */}
           <Route element={<OrgPortalRoute />}>
             <Route path="/org" element={<OrgShell />}>
-              <Route index element={<Navigate to="/org/dashboard" replace />} />
+              <Route index element={<Navigate to="/org/onboarding" replace />} />
               <Route path="dashboard"     element={<OrgDashboard />} />
               <Route path="onboarding"    element={<OrgMyOnboarding />} />
               <Route path="contributions" element={<OrgContributions />} />
@@ -69,6 +70,7 @@ export default function AppRouter() {
               <Route path="my-forms"       element={<OrgMyForms />} />
               <Route path="chat"           element={<OrgChat />} />
               <Route path="admin-guide"    element={<OrgAdminGuide />} />
+              <Route path="profile"        element={<OrgProfilePage />} />
             </Route>
           </Route>
 

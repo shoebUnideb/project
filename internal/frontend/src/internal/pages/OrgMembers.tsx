@@ -832,14 +832,14 @@ function RolesTab({ roles, isSuperadmin, onReload }: {
 }) {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [creating, setCreating] = useState(false);
-  const [editForm, setEditForm] = useState({ name: '', level: 1, can_manage_members: false, can_view_all_contributions: false, can_approve_checkins: false, can_upload_agreements: false });
-  const [newForm, setNewForm] = useState({ name: '', level: 1, can_manage_members: false, can_view_all_contributions: false, can_approve_checkins: false, can_upload_agreements: false });
+  const [editForm, setEditForm] = useState({ name: '', level: 1, can_manage_members: false, can_view_all_contributions: false });
+  const [newForm, setNewForm] = useState({ name: '', level: 1, can_manage_members: false, can_view_all_contributions: false });
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
 
   const handleEdit = (r: InternalRole) => {
     setEditingId(r.id);
-    setEditForm({ name: r.name, level: r.level, can_manage_members: r.can_manage_members, can_view_all_contributions: r.can_view_all_contributions, can_approve_checkins: r.can_approve_checkins, can_upload_agreements: r.can_upload_agreements });
+    setEditForm({ name: r.name, level: r.level, can_manage_members: r.can_manage_members, can_view_all_contributions: r.can_view_all_contributions });
   };
 
   const handleSaveEdit = async () => {
@@ -858,7 +858,7 @@ function RolesTab({ roles, isSuperadmin, onReload }: {
     try {
       await apiClient.post('/api/org/roles/', newForm);
       setCreating(false);
-      setNewForm({ name: '', level: 1, can_manage_members: false, can_view_all_contributions: false, can_approve_checkins: false, can_upload_agreements: false });
+      setNewForm({ name: '', level: 1, can_manage_members: false, can_view_all_contributions: false });
       onReload();
     } catch { setErr('Failed to create role.'); }
     finally { setSaving(false); }
@@ -877,8 +877,6 @@ function RolesTab({ roles, isSuperadmin, onReload }: {
   const PERM_COLS = [
     { key: 'can_manage_members' as const, label: 'Manage Mbrs' },
     { key: 'can_view_all_contributions' as const, label: 'View Contrib.' },
-    { key: 'can_approve_checkins' as const, label: 'Approve CIs' },
-    { key: 'can_upload_agreements' as const, label: 'Upload Docs' },
   ];
 
   return (
@@ -1014,8 +1012,6 @@ function PermissionsTab({ roles }: { roles: InternalRole[] }) {
   const PERMS = [
     { key: 'can_manage_members' as const, label: 'Manage Members', desc: 'View and manage org members' },
     { key: 'can_view_all_contributions' as const, label: 'View All Contributions', desc: 'See all member contributions' },
-    { key: 'can_approve_checkins' as const, label: 'Approve Check-ins', desc: 'Review and approve check-ins' },
-    { key: 'can_upload_agreements' as const, label: 'Upload Agreements', desc: 'Upload and manage agreements' },
   ];
 
   return (

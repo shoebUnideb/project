@@ -21,7 +21,7 @@ interface AuthContextValue {
 
 function buildUser(payload: Record<string, unknown>): User {
   return {
-    id:                   payload.user_id as number,
+    id:                   Number(payload.user_id),
     username:             payload.username as string,
     email:                payload.email as string,
     first_name:           payload.first_name as string,

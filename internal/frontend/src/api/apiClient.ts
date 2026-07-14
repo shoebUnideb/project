@@ -9,7 +9,7 @@ export class ApiError extends Error {
   }
 }
 
-// ── Cookie helpers (shared across localhost ports for SSO) ────────────
+// ── Cookie helpers (port-isolated: gile_internal_* for this portal) ──
 
 const _MAX_AGE = 30 * 24 * 3600;
 
@@ -27,16 +27,16 @@ function _delCookie(name: string) {
 // ── Token storage helpers ────────────────────────────────────────────
 
 export const tokens = {
-  getAccess:  (): string => _getCookie('gile_access'),
-  getRefresh: (): string => _getCookie('gile_refresh'),
-  setAccess:  (t: string) => _setCookie('gile_access', t),
+  getAccess:  (): string => _getCookie('gile_internal_access'),
+  getRefresh: (): string => _getCookie('gile_internal_refresh'),
+  setAccess:  (t: string) => _setCookie('gile_internal_access', t),
   set: (a: string, r: string) => {
-    _setCookie('gile_access', a);
-    _setCookie('gile_refresh', r);
+    _setCookie('gile_internal_access', a);
+    _setCookie('gile_internal_refresh', r);
   },
   clear: () => {
-    _delCookie('gile_access');
-    _delCookie('gile_refresh');
+    _delCookie('gile_internal_access');
+    _delCookie('gile_internal_refresh');
   },
   isExpired: (token: string): boolean => {
     try {

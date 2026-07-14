@@ -15,13 +15,14 @@ interface AuthContextValue {
   logout:         () => Promise<void>;
   updateSettings: (payload: { message_permission?: string; theme_color?: string; font_style?: string }) => Promise<void>;
   refreshUser:    () => Promise<void>;
+  patchUser:      (partial: Partial<User>) => void;
 }
 
 /* ── Helpers ────────────────────────────────────── */
 
 function buildUser(payload: Record<string, unknown>): User {
   return {
-    id:                   payload.user_id as number,
+    id:                   Number(payload.user_id),
     username:             payload.username as string,
     email:                payload.email as string,
     first_name:           payload.first_name as string,
@@ -123,9 +124,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch { /* ignore */ }
   };
 
+  const patchUser = (partial: Partial<User>) => {
+    setUser(prev => prev ? { ...prev, ...partial } : null);
+  };
+
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated: !!user, isLoading, login, register, logout, updateSettings, refreshUser }}
+      value={{ user, isAuthenticated: !!user, isLoading, login, register, logout, updateSettings, refreshUser, patchUser }}
     >
       {children}
     </AuthContext.Provider>

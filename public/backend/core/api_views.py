@@ -121,9 +121,7 @@ def mentor_students(request):
     """Return all students assigned to the logged-in mentor."""
     if request.user.role != 'mentor':
         return Response({'detail': 'Forbidden.'}, status=status.HTTP_403_FORBIDDEN)
-    mentor_profile = _mentor_profile(request.user)
-    if not mentor_profile:
-        return Response({'detail': 'Mentor profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+    mentor_profile, _ = MentorProfile.objects.get_or_create(user=request.user)
     assignments = Assignment.objects.filter(mentor=mentor_profile, is_active=True).select_related('student__user')
     students = [a.student for a in assignments]
     return Response(StudentProfileSerializer(students, many=True, context={'request': request}).data)
@@ -135,9 +133,7 @@ def mentor_student_detail(request, student_id):
     """Mentor views a specific assigned student."""
     if request.user.role != 'mentor':
         return Response({'detail': 'Forbidden.'}, status=status.HTTP_403_FORBIDDEN)
-    mentor_profile = _mentor_profile(request.user)
-    if not mentor_profile:
-        return Response({'detail': 'Mentor profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+    mentor_profile, _ = MentorProfile.objects.get_or_create(user=request.user)
     student_profile = get_object_or_404(StudentProfile, pk=student_id)
     if not Assignment.objects.filter(mentor=mentor_profile, student=student_profile, is_active=True).exists():
         return Response({'detail': 'Not your assigned student.'}, status=status.HTTP_403_FORBIDDEN)
@@ -274,16 +270,14 @@ def marketplace_users(request):
 
     result = []
 
-    mentors = CustomUser.objects.filter(role='mentor', is_approved=True).exclude(pk=user.pk)
-    for u in mentors:
-        p = MentorProfile.objects.filter(user=u).first()
-        pic = p.profile_picture.url if p and p.profile_picture else None
-        expertise_tags = _split_tags(p.expertise if p else '')
-        filled = sum(bool(f) for f in [
-            p.bio if p else '', p.expertise if p else '',
-            p.phone if p else '', p.linkedin_url if p else '',
-            pic,
-        ])
+    for p in (MentorProfile.objects
+              .select_related('user')
+              .filter(user__role='mentor', user__is_approved=True)
+              .exclude(user=user)):
+        u = p.user
+        pic = p.profile_picture.url if p.profile_picture else None
+        expertise_tags = _split_tags(p.expertise or '')
+        filled = sum(bool(f) for f in [p.bio, p.expertise, p.phone, p.linkedin_url, pic])
         result.append({
             'id': u.id,
             'username': u.username,
@@ -291,11 +285,11 @@ def marketplace_users(request):
             'last_name': u.last_name,
             'role': 'mentor',
             'date_joined': u.date_joined.isoformat(),
-            'bio': p.bio if p else '',
-            'headline': p.expertise if p else '',
-            'expertise': p.expertise if p else '',
-            'phone': p.phone if p else '',
-            'linkedin_url': p.linkedin_url if p else '',
+            'bio': p.bio or '',
+            'headline': p.expertise or '',
+            'expertise': p.expertise or '',
+            'phone': p.phone or '',
+            'linkedin_url': p.linkedin_url or '',
             'profile_picture': pic,
             'tags': expertise_tags,
             'skills': [],
@@ -305,21 +299,21 @@ def marketplace_users(request):
             'is_assigned': u.id in assigned_ids,
             'profile_completeness': round(filled / 5 * 100),
             'messaging_status': messaging_status(u),
-            'domain': p.domain if p else '',
-            'preferred_student_level': p.preferred_student_level if p else '',
-            'timezone': p.timezone if p else '',
+            'domain': p.domain or '',
+            'preferred_student_level': p.preferred_student_level or '',
+            'timezone': p.timezone or '',
         })
 
-    students = CustomUser.objects.filter(role='student').exclude(pk=user.pk)
-    for u in students:
-        p = StudentProfile.objects.filter(user=u).first()
-        pic = p.profile_picture.url if p and p.profile_picture else None
-        skills = _split_tags(p.skills if p else '')
-        fos_tags = _split_tags(p.field_of_study if p else '')
+    for p in (StudentProfile.objects
+              .select_related('user')
+              .filter(user__role='student')
+              .exclude(user=user)):
+        u = p.user
+        pic = p.profile_picture.url if p.profile_picture else None
+        skills = _split_tags(p.skills or '')
+        fos_tags = _split_tags(p.field_of_study or '')
         filled = sum(bool(f) for f in [
-            p.bio if p else '', p.headline if p else '',
-            p.field_of_study if p else '', p.university if p else '',
-            p.mentorship_goals if p else '', pic,
+            p.bio, p.headline, p.field_of_study, p.university, p.mentorship_goals, pic,
         ])
         result.append({
             'id': u.id,
@@ -328,14 +322,14 @@ def marketplace_users(request):
             'last_name': u.last_name,
             'role': 'student',
             'date_joined': u.date_joined.isoformat(),
-            'bio': p.bio if p else '',
-            'headline': p.headline if p else '',
+            'bio': p.bio or '',
+            'headline': p.headline or '',
             'expertise': '',
-            'phone': p.phone if p else '',
-            'linkedin_url': p.linkedin_url if p else '',
-            'university': p.university if p else '',
-            'field_of_study': p.field_of_study if p else '',
-            'career_stage': p.career_stage if p else '',
+            'phone': p.phone or '',
+            'linkedin_url': p.linkedin_url or '',
+            'university': p.university or '',
+            'field_of_study': p.field_of_study or '',
+            'career_stage': p.career_stage or '',
             'profile_picture': pic,
             'tags': fos_tags,
             'skills': skills,
@@ -564,9 +558,7 @@ def workspace_list(request):
     # POST
     if user.role != 'mentor':
         return Response({'detail': 'Only mentors can create workspaces.'}, status=status.HTTP_403_FORBIDDEN)
-    mp = _mentor_profile(user)
-    if not mp:
-        return Response({'detail': 'Mentor profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+    mp, _ = MentorProfile.objects.get_or_create(user=user)
     name = request.data.get('name', '').strip()
     if not name:
         return Response({'detail': 'name is required.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -724,9 +716,7 @@ def workspace_join_invite(request):
     if not token:
         return Response({'detail': 'token is required.'}, status=400)
     workspace = get_object_or_404(Workspace, invite_token=token, is_active=True)
-    sp = _student_profile(user)
-    if not sp:
-        return Response({'detail': 'Student profile not found.'}, status=404)
+    sp, _ = StudentProfile.objects.get_or_create(user=user)
     if workspace.max_members:
         current = workspace.memberships.filter(status='approved').count()
         if current >= workspace.max_members:
@@ -751,9 +741,7 @@ def workspace_join(request, pk):
     workspace = get_object_or_404(Workspace, pk=pk, is_active=True)
     if workspace.privacy == 'private' or workspace.privacy == 'secret':
         return Response({'detail': 'This workspace requires an invite link to join.'}, status=403)
-    sp = _student_profile(user)
-    if not sp:
-        return Response({'detail': 'Student profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+    sp, _ = StudentProfile.objects.get_or_create(user=user)
     if workspace.max_members:
         current = workspace.memberships.filter(status='approved').count()
         if current >= workspace.max_members:
@@ -785,7 +773,7 @@ def workspace_join_cancel(request, pk):
     workspace = get_object_or_404(Workspace, pk=pk)
     sp = _student_profile(user)
     if not sp:
-        return Response({'detail': 'Student profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response({'detail': 'No pending request found.'}, status=status.HTTP_404_NOT_FOUND)
     deleted, _ = WorkspaceMembership.objects.filter(
         workspace=workspace, student=sp, status=WorkspaceMembership.STATUS_PENDING
     ).delete()
@@ -802,9 +790,7 @@ def workspace_leave(request, pk):
     if user.role != 'student':
         return Response({'detail': 'Only students can leave workspaces.'}, status=status.HTTP_403_FORBIDDEN)
     workspace = get_object_or_404(Workspace, pk=pk)
-    sp = _student_profile(user)
-    if not sp:
-        return Response({'detail': 'Student profile not found.'}, status=status.HTTP_404_NOT_FOUND)
+    sp, _ = StudentProfile.objects.get_or_create(user=user)
     deleted, _ = WorkspaceMembership.objects.filter(
         workspace=workspace, student=sp, status=WorkspaceMembership.STATUS_APPROVED
     ).delete()
@@ -3657,9 +3643,7 @@ def workspace_invite_mentor(request, pk):
 def workspace_accept_mentor(request, pk):
     """POST: invited mentor accepts. DELETE: decline invite or leave workspace."""
     workspace = get_object_or_404(Workspace, pk=pk, is_active=True)
-    mp = _mentor_profile(request.user)
-    if not mp:
-        return Response({'detail': 'Mentor profile not found.'}, status=404)
+    mp, _ = MentorProfile.objects.get_or_create(user=request.user)
     guest = WorkspaceMentor.objects.filter(workspace=workspace, mentor=mp).first()
     if not guest:
         return Response({'detail': 'No pending invitation found.'}, status=404)
@@ -4880,10 +4864,7 @@ def workspace_direct_invite(request, pk):
 @permission_classes([IsAuthenticated])
 def workspace_accept_invite(request, pk):
     workspace = get_object_or_404(Workspace, pk=pk, is_active=True)
-    sp = _student_profile(request.user)
-    if not sp:
-        return Response({'detail': 'Student profile not found.'}, status=404)
-
+    sp, _ = StudentProfile.objects.get_or_create(user=request.user)
     membership = WorkspaceMembership.objects.filter(
         workspace=workspace, student=sp, status=WorkspaceMembership.STATUS_INVITED
     ).first()
@@ -4986,9 +4967,7 @@ def workspace_onboarding_question_detail(request, pk, qid):
 @permission_classes([IsAuthenticated])
 def workspace_onboarding_my_response(request, pk):
     workspace = get_object_or_404(Workspace, pk=pk, is_active=True)
-    sp = _student_profile(request.user)
-    if not sp:
-        return Response({'detail': 'Students only.'}, status=403)
+    sp, _ = StudentProfile.objects.get_or_create(user=request.user)
     membership = WorkspaceMembership.objects.filter(
         workspace=workspace, student=sp, status='approved'
     ).first()

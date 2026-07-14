@@ -28,6 +28,7 @@ function getPageLabel(pathname: string): string {
   if (pathname.startsWith('/org/audit'))           return 'Audit Logs';
   if (pathname.startsWith('/org/recruitment'))     return 'Recruitment';
   if (pathname.startsWith('/org/roles'))           return 'Roles';
+  if (pathname.startsWith('/org/profile'))         return 'My Profile';
   return '';
 }
 
@@ -46,9 +47,7 @@ export default function OrgTopbar() {
   const displayName = user?.first_name
     ? `${user.first_name} ${user.last_name ?? ''}`.trim()
     : user?.username ?? '';
-  const profileRoute =
-    user?.role === 'student'    ? '/student/profile' :
-    user?.role === 'mentor'     ? '/mentor/profile'  : '/admin/settings';
+  const profileRoute = '/org/profile';
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -63,7 +62,7 @@ export default function OrgTopbar() {
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-30 h-10 bg-white border-b border-gray-200 flex items-center px-4 gap-3">
-        <Link to="/org/dashboard" className="hidden sm:flex items-center gap-2.5 shrink-0 self-stretch py-1">
+        <Link to="/org/onboarding" className="hidden sm:flex items-center gap-2.5 shrink-0 self-stretch py-1">
           <div className="bg-gray-100 rounded h-full flex items-center px-1.5">
             <img src="/gile.png" alt="GILE Foundation" className="h-full w-auto" />
           </div>

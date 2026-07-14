@@ -17,9 +17,9 @@ const NAV = [
 ];
 
 function PrivacyIcon({ privacy }: { privacy: string }) {
-  if (privacy === 'private') return <Lock size={10} className="text-white/60" />;
-  if (privacy === 'secret')  return <EyeOff size={10} className="text-white/60" />;
-  return <Globe size={10} className="text-white/60" />;
+  if (privacy === 'private') return <Lock size={10} className="text-gray-400" />;
+  if (privacy === 'secret')  return <EyeOff size={10} className="text-gray-400" />;
+  return <Globe size={10} className="text-gray-400" />;
 }
 
 function getResourceIcon(r: WorkspaceResource) {
@@ -66,34 +66,34 @@ export default function WorkspaceSidebar({ width }: { width?: number }) {
 
   return (
     <aside
-      className="fixed top-10 bottom-0 left-0 z-20 flex flex-col bg-primary-600 overflow-y-auto overflow-x-hidden"
+      className="fixed top-10 bottom-0 left-0 z-20 flex flex-col bg-white border-r border-gray-200 overflow-y-auto overflow-x-hidden"
       style={{ width: width ?? 185 }}
     >
 
       {/* Workspace switcher */}
-      <div className="px-3.5 py-3 bg-primary-700 shrink-0 relative" ref={dropdownRef}>
+      <div className="px-3.5 py-3 bg-gray-50 border-b border-gray-100 shrink-0 relative" ref={dropdownRef}>
         <div className="flex items-center gap-1">
           <button
             onClick={() => setDropdownOpen(o => !o)}
-            className="flex-1 min-w-0 flex items-center gap-2.5 rounded-lg hover:bg-white/[0.10] px-1 py-1 transition-colors"
+            className="flex-1 min-w-0 flex items-center gap-2.5 rounded-lg hover:bg-gray-100 px-1 py-1 transition-colors"
           >
             {workspace.logo_url ? (
               <img src={workspace.logo_url} alt="logo" className="w-8 h-8 rounded-lg object-cover shrink-0" />
             ) : (
-              <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-white text-[16px] shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 text-[16px] shrink-0">
                 {workspace.icon_emoji || workspace.name[0]?.toUpperCase()}
               </div>
             )}
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-[13px] font-bold text-white truncate leading-tight">{workspace.name}</p>
+              <p className="text-[13px] font-bold text-gray-900 truncate leading-tight">{workspace.name}</p>
               <div className="flex items-center gap-1 mt-0.5">
                 <PrivacyIcon privacy={workspace.privacy} />
-                <span className="text-[10px] text-white/60 capitalize">
+                <span className="text-[10px] text-gray-400 capitalize">
                   {isMentor ? 'Mentor' : `${workspace.privacy} workspace`}
                 </span>
               </div>
             </div>
-            <ChevronDown size={14} className={`shrink-0 text-white/60 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+            <ChevronDown size={14} className={`shrink-0 text-gray-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
           </button>
 
           {isOwner && (
@@ -102,7 +102,7 @@ export default function WorkspaceSidebar({ width }: { width?: number }) {
               title="Workspace settings"
               className={({ isActive }) =>
                 ['shrink-0 p-1.5 rounded-md transition-colors',
-                  isActive ? 'text-white bg-white/20' : 'text-white/70 hover:text-white hover:bg-white/[0.12]',
+                  isActive ? 'text-gray-900 bg-gray-100' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100',
                 ].join(' ')
               }
             >
@@ -113,36 +113,36 @@ export default function WorkspaceSidebar({ width }: { width?: number }) {
 
         {/* Dropdown */}
         {dropdownOpen && (
-          <div className="absolute left-2 right-2 top-full mt-1 z-50 bg-primary-600 border border-white/20 rounded-xl shadow-2xl overflow-hidden py-1">
-            <p className="text-[10px] font-semibold text-white/60 uppercase tracking-widest px-3 pt-2 pb-1.5">
+          <div className="absolute left-2 right-2 top-full mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden py-1">
+            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 pt-2 pb-1.5">
               My Workspaces
             </p>
             <div className="max-h-64 overflow-y-auto">
               {memberWorkspaces.length === 0 && (
-                <p className="text-[12px] text-white/70 px-3 py-3">No workspaces found.</p>
+              <p className="text-[12px] text-gray-500 px-3 py-3">No workspaces found.</p>
               )}
               {memberWorkspaces.map(w => (
                 <button
                   key={w.id}
                   onClick={() => { setDropdownOpen(false); navigate(`/w/${w.slug}`); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-white/[0.12] transition-colors text-left"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 transition-colors text-left"
                 >
                   {w.logo_url ? (
                     <img src={w.logo_url} alt="" className="w-7 h-7 rounded-md object-cover shrink-0" />
                   ) : (
-                    <div className="w-7 h-7 rounded-md flex items-center justify-center text-white text-[13px] shrink-0 bg-white/20">
+                    <div className="w-7 h-7 rounded-md flex items-center justify-center text-gray-600 text-[13px] shrink-0 bg-gray-100">
                       {w.icon_emoji || w.name[0]?.toUpperCase()}
                     </div>
                   )}
-                  <span className="flex-1 min-w-0 text-[12.5px] font-medium text-white truncate">{w.name}</span>
-                  {w.id === workspace.id && <Check size={13} className="shrink-0 text-white" />}
+                  <span className="flex-1 min-w-0 text-[12.5px] font-medium text-gray-900 truncate">{w.name}</span>
+                  {w.id === workspace.id && <Check size={13} className="shrink-0 text-primary-600" />}
                 </button>
               ))}
             </div>
-            <div className="border-t border-white/20 mt-1">
+            <div className="border-t border-gray-100 mt-1">
               <button
                 onClick={() => { setDropdownOpen(false); navigate('/workspaces'); }}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-[12px] text-white/70 hover:text-white hover:bg-white/[0.12] transition-colors"
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-[12px] text-gray-500 hover:text-gray-800 hover:bg-gray-50 transition-colors"
               >
                 <ArrowLeft size={12} /> All workspaces
               </button>
@@ -155,7 +155,7 @@ export default function WorkspaceSidebar({ width }: { width?: number }) {
       {/* Nav */}
       <nav className="px-2 py-2 space-y-0.5 shrink-0">
         <Link to="/workspaces"
-          className="flex items-center gap-2.5 px-2.5 py-1 rounded-md text-[12.5px] font-medium text-white/70 hover:bg-white/[0.12] hover:text-white transition-colors mb-1">
+          className="flex items-center gap-2.5 px-2.5 py-1 rounded-md text-[12.5px] font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors mb-1">
           <ArrowLeft size={15} /> Back to platform
         </Link>
         {NAV.map(item => {
@@ -168,12 +168,12 @@ export default function WorkspaceSidebar({ width }: { width?: number }) {
               className={({ isActive }) =>
                 ['flex items-center gap-2.5 px-2.5 py-1 rounded-md text-[12.5px] font-medium transition-colors',
                   isActive
-                    ? 'bg-white/20 text-white'
-                    : 'text-white/80 hover:bg-white/[0.12] hover:text-white',
+                    ? 'bg-gray-100 text-gray-900'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
                 ].join(' ')
               }
             >
-              <span className="shrink-0 opacity-80">{item.icon}</span>
+              <span className="shrink-0">{item.icon}</span>
               {item.label}
             </NavLink>
           );
@@ -183,11 +183,11 @@ export default function WorkspaceSidebar({ width }: { width?: number }) {
             to={`${base}/submissions`}
             className={({ isActive }) =>
               ['flex items-center gap-2.5 px-2.5 py-1 rounded-md text-[12.5px] font-medium transition-colors',
-                isActive ? 'bg-white/20 text-white' : 'text-white/80 hover:bg-white/[0.12] hover:text-white',
+                isActive ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
               ].join(' ')
             }
           >
-            <span className="shrink-0 opacity-80"><ClipboardList size={15} /></span>
+            <span className="shrink-0"><ClipboardList size={15} /></span>
             Submissions
           </NavLink>
         )}
@@ -195,16 +195,16 @@ export default function WorkspaceSidebar({ width }: { width?: number }) {
 
       {/* Quick Access */}
       {quickResources.length > 0 && (
-        <div className="px-3.5 py-3 border-t border-white/20 shrink-0">
-          <p className="text-[10px] font-semibold text-white/60 uppercase tracking-widest mb-2">
+        <div className="px-3.5 py-3 border-t border-gray-100 shrink-0">
+          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">
             Quick Access
           </p>
           <div className="space-y-0.5">
             {quickResources.map(r => {
               const url = r.resource_type === 'link' ? r.url : r.file_url;
               const inner = (
-                <div className="flex items-center gap-2 px-2 py-1.5 rounded-md text-[12px] text-white/80 hover:bg-white/[0.12] hover:text-white transition-colors">
-                  <span className="shrink-0 opacity-70">{getResourceIcon(r)}</span>
+                <div className="flex items-center gap-2 px-2 py-1.5 rounded-md text-[12px] text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+                  <span className="shrink-0">{getResourceIcon(r)}</span>
                   <span className="truncate">{r.title}</span>
                 </div>
               );
@@ -230,10 +230,10 @@ export default function WorkspaceSidebar({ width }: { width?: number }) {
       <div className="flex-1" />
 
       {/* Footer */}
-      <div className="px-3.5 py-3 mb-2 bg-primary-700 shrink-0">
+      <div className="px-3.5 py-3 mb-2 bg-gray-50 border-t border-gray-100 shrink-0">
         <div className="flex items-center gap-2">
           <Avatar name={displayName} size="sm" />
-          <span className="text-[11.5px] text-white/70 truncate">{displayName || `@${user?.username}`}</span>
+          <span className="text-[11.5px] text-gray-600 truncate">{displayName || `@${user?.username}`}</span>
         </div>
       </div>
     </aside>
