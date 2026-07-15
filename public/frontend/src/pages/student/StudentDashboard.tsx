@@ -309,19 +309,6 @@ export default function StudentDashboard() {
 
         {/* Left: stats + resources + recent activity */}
         <div className="lg:col-span-3 flex flex-col gap-4">
-          {/* Stats */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {stats.map(s => (
-              <div key={s.label} className="bg-white border border-[#e0e0e0] rounded-lg px-4 py-2.5 flex items-center gap-3">
-                <p className="text-[22px] font-bold text-gray-900 leading-none">{s.value}</p>
-                <div className="min-w-0">
-                  <p className="text-[12px] font-medium text-gray-700 leading-tight truncate">{s.label}</p>
-                  <p className="text-[10.5px] text-gray-400 leading-tight">{s.sub}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
           {/* Resources */}
           <Card padding="md">
             <p className="text-[12.5px] font-bold text-gray-900 mb-3">Resources</p>

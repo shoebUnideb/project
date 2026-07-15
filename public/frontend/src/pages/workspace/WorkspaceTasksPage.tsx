@@ -144,11 +144,6 @@ export default function WorkspaceTasksPage() {
         </div>
       </div>
 
-      {/* Stats strip */}
-      {(isOwner || isMentor)
-        ? tasks.length > 0 && <MentorStatsStrip tasks={tasks} />
-        : tasks.length > 0 && <StudentStatsStrip tasks={tasks} />}
-
       {/* Filter bar */}
       <div className="flex items-center gap-2 mb-4 flex-wrap">
         <div className="relative flex-1 min-w-[160px] max-w-xs">

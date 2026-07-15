@@ -258,15 +258,15 @@ export default function WorkspaceHome() {
       <div className="flex-1 min-w-0 space-y-5">
 
         {/* 1 — Hero banner */}
-        <div className="rounded-2xl overflow-hidden relative bg-primary-600">
+        <div className="rounded-2xl overflow-hidden relative bg-gray-900">
           {workspace.cover_image_url && (
             <>
               <img
                 src={workspace.cover_image_url}
                 alt=""
-                className="absolute inset-0 w-full h-full object-cover"
+                className="absolute inset-0 w-full h-full object-cover opacity-30"
               />
-              <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 60%, rgba(0,0,0,0.45) 100%)' }} />
+              <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.25) 100%)' }} />
             </>
           )}
           <div className="relative z-10 px-7 pt-6 pb-6">
