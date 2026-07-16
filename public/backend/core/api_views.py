@@ -3734,9 +3734,7 @@ def workspace_event_detail(request, pk, eid):
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def personal_tasks_list(request):
-    student = StudentProfile.objects.filter(user=request.user).first()
-    if not student:
-        return Response({'detail': 'Student profile not found.'}, status=403)
+    student, _ = StudentProfile.objects.get_or_create(user=request.user)
 
     if request.method == 'GET':
         _fire_due_reminders(student)
@@ -3752,9 +3750,7 @@ def personal_tasks_list(request):
 @api_view(['PATCH', 'DELETE'])
 @permission_classes([IsAuthenticated])
 def personal_task_detail(request, pk):
-    student = StudentProfile.objects.filter(user=request.user).first()
-    if not student:
-        return Response({'detail': 'Student profile not found.'}, status=403)
+    student, _ = StudentProfile.objects.get_or_create(user=request.user)
 
     task = get_object_or_404(PersonalTask, pk=pk, student=student)
 

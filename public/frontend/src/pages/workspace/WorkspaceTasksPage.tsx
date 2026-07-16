@@ -146,13 +146,13 @@ export default function WorkspaceTasksPage() {
 
       {/* Filter bar */}
       <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <div className="relative flex-1 min-w-[160px] max-w-xs">
+        <div className="relative flex-1 min-w-[160px] max-w-xs h-8">
           <Search size={12} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
           <input
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             placeholder="Search tasks…"
-            className="w-full pl-7 pr-3 py-1.5 text-[12px] border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-300 bg-white shadow-sm"
+            className="w-full h-full pl-7 pr-3 text-[12px] border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-300 bg-white shadow-sm"
           />
           {search && (
             <button onClick={() => { setSearch(''); setPage(1); }} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-300 hover:text-gray-500">
@@ -164,7 +164,7 @@ export default function WorkspaceTasksPage() {
         <select
           value={typeFilter}
           onChange={e => { setTypeFilter(e.target.value as WorkspaceTaskType | 'all'); setPage(1); }}
-          className="px-2.5 py-1.5 text-[12px] border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-300 bg-white shadow-sm text-gray-600"
+          className="h-8 px-2.5 text-[12px] border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-300 bg-white shadow-sm text-gray-600"
         >
           <option value="all">All Types</option>
           <option value="assignment">Assignment</option>
@@ -174,10 +174,10 @@ export default function WorkspaceTasksPage() {
         </select>
 
         {(isOwner || isMentor) && (
-          <div className="flex items-center gap-0.5 bg-gray-100 rounded-lg p-0.5">
+          <div className="flex items-center gap-0.5 bg-gray-100 rounded-lg p-0.5 h-8">
             {(['all', 'published', 'draft', 'archived'] as StatusFilter[]).map(f => (
               <button key={f} onClick={() => { setFilter(f); setPage(1); }}
-                className={`px-2.5 py-1 text-[11.5px] font-medium rounded-md transition-colors capitalize ${
+                className={`h-full px-2.5 text-[11.5px] font-medium rounded-md transition-colors capitalize ${
                   filter === f ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'
                 }`}>
                 {f}{f === 'published' ? ` (${publishedCount})` : f === 'draft' ? ` (${draftCount})` : ''}

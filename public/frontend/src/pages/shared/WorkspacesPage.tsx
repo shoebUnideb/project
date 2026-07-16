@@ -5,7 +5,7 @@ import {
   Plus, Users, BookOpen, Globe, LayoutGrid, Star,
   Calendar, ChevronRight, MoreHorizontal, ArrowUpRight,
   Lock, EyeOff, CheckSquare, TrendingUp, List,
-  ExternalLink, Settings, LogOut, Trash2, Target,
+  ExternalLink, Settings, LogOut, Trash2,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useApiList } from '../../hooks/useApi';
@@ -591,34 +591,6 @@ function ListRow({ ws, onOpen, onJoin, onDelete, onLeave, onAcceptInvite, onDecl
   );
 }
 
-// ── Sidebar deadline row ──────────────────────────────────────────────────────
-function DeadlineRow({ ws, navigate }: { ws: Workspace; navigate: (p: string) => void }) {
-  if (!ws.target_deadline) return null;
-  const d = new Date(ws.target_deadline);
-  const month = d.toLocaleDateString('en', { month: 'short' }).toUpperCase();
-  const day = d.getDate();
-  return (
-    <div
-      className="flex items-start gap-3 py-3 border-b border-gray-50 last:border-0 cursor-pointer hover:bg-gray-50 rounded-lg -mx-1 px-1 transition-colors"
-      onClick={() => navigate(workspacePath(ws))}
-    >
-      <div className="w-11 shrink-0 text-center bg-primary-50 rounded-lg py-1">
-        <p className="text-[10px] font-bold text-primary-600">{month}</p>
-        <p className="text-[18px] font-bold text-gray-900 leading-none">{day}</p>
-      </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-[12.5px] font-semibold text-gray-900 line-clamp-1">{ws.name}</p>
-        <p className="text-[11px] text-gray-400">{ws.mentor_name}</p>
-        <div className="flex items-center gap-1 mt-1">
-          <Avatar name={ws.mentor_name} src={ws.mentor_picture} size="sm" />
-          <span className="text-[10.5px] text-gray-400">
-            {ws.member_count} {ws.member_count === 1 ? 'member' : 'members'}
-          </span>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ── Main page ──────────────────────────────────────────────────────────────────
 export default function WorkspacesPage() {
@@ -656,11 +628,6 @@ export default function WorkspacesPage() {
   const featured  = memberWs[0] ?? workspaces[0];
   const sideCards = workspaces.filter(w => w !== featured).slice(0, 2);
 
-  const maxRes    = Math.max(...memberWs.map(w => w.resource_count), 1);
-  const glanceWs  = memberWs.slice(0, 4);
-  const barColors = ['bg-green-500', 'bg-teal-500', 'bg-orange-400', 'bg-purple-500'];
-
-  const withDeadlines  = workspaces.filter(w => w.target_deadline).slice(0, 3);
   const recentActivity = [...workspaces]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 4);
@@ -789,95 +756,6 @@ export default function WorkspacesPage() {
                   {sideCards.map(ws => (
                     <CompactSideCard key={ws.id} ws={ws} onClick={() => navigate(workspacePath(ws))} />
                   ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Programs + Upcoming */}
-          {memberWs.length > 0 && (
-            <div className="flex gap-3">
-              <div className="flex-1 bg-white border border-[#e0e0e0] rounded-xl p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <p className="text-[13.5px] font-bold text-gray-900">Programs at a glance</p>
-                  <button
-                    onClick={() => switchTab('joined')}
-                    className="text-[12px] text-primary-600 font-medium hover:underline"
-                  >
-                    View all
-                  </button>
-                </div>
-                <div className="space-y-3">
-                  {glanceWs.map((ws, i) => {
-                    const pct = Math.round((ws.resource_count / maxRes) * 100);
-                    return (
-                      <div
-                        key={ws.id}
-                        className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
-                        onClick={() => navigate(workspacePath(ws))}
-                      >
-                        <WorkspaceIcon ws={ws} sizeClass="w-7 h-7" roundedClass="rounded-lg" />
-                        <div className="flex-1 min-w-0 max-w-[200px]">
-                          <p className="text-[12px] font-semibold text-gray-800 truncate">{ws.name}</p>
-                          <p className="text-[10.5px] text-gray-400 truncate">{ws.mentor_name}</p>
-                        </div>
-                        <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                          <div className={`h-full ${barColors[i % barColors.length]} rounded-full`} style={{ width: `${pct || 5}%` }} />
-                        </div>
-                        <p className="text-[11px] text-gray-500 w-7 text-right">{pct}%</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {withDeadlines.length > 0 ? (
-                <div className="flex-1 bg-gradient-to-br from-amber-50 to-orange-50 border border-orange-100 rounded-xl p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <Calendar size={14} className="text-orange-500" />
-                    <p className="text-[12px] font-semibold text-orange-600 uppercase tracking-wide">Upcoming soon</p>
-                  </div>
-                  {(() => {
-                    const ws = withDeadlines[0];
-                    const d = new Date(ws.target_deadline!);
-                    const daysLeft = Math.max(0, Math.ceil((d.getTime() - Date.now()) / 86400000));
-                    return (
-                      <div className="flex gap-3 items-start">
-                        <div className="flex-1">
-                          <h4 className="text-[15px] font-bold text-gray-900 leading-snug line-clamp-2">{ws.name}</h4>
-                          <p className="text-[11.5px] text-gray-500 mt-1">
-                            {d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
-                          </p>
-                          {ws.target_country && (
-                            <p className="text-[11px] text-gray-400 mt-0.5 flex items-center gap-1">
-                              <Target size={10} /> {ws.target_country}
-                            </p>
-                          )}
-                          <div className="flex items-center gap-2 mt-3">
-                            <Avatar name={ws.mentor_name} src={ws.mentor_picture} size="sm" />
-                            <button
-                              onClick={() => navigate(workspacePath(ws))}
-                              className="px-3 py-1.5 bg-white border border-orange-200 text-orange-700 text-[11.5px] font-semibold rounded-lg hover:bg-orange-50 transition-colors"
-                            >
-                              Open workspace
-                            </button>
-                          </div>
-                        </div>
-                        <div className="w-14 h-14 bg-orange-100 rounded-xl flex flex-col items-center justify-center shrink-0">
-                          <p className="text-[18px] font-bold text-orange-600 leading-none">{daysLeft}</p>
-                          <p className="text-[9.5px] text-orange-500 font-medium mt-0.5">Days left</p>
-                        </div>
-                      </div>
-                    );
-                  })()}
-                </div>
-              ) : (
-                <div className="flex-1 bg-gradient-to-br from-primary-50 to-indigo-50 border border-primary-100 rounded-xl p-4 flex flex-col items-center justify-center text-center gap-2">
-                  <Calendar size={24} className="text-primary-300" />
-                  <p className="text-[13px] font-semibold text-gray-700">No upcoming deadlines</p>
-                  {user?.role === 'mentor' && (
-                    <p className="text-[11.5px] text-gray-400">Set a deadline in workspace settings</p>
-                  )}
                 </div>
               )}
             </div>
@@ -1042,32 +920,6 @@ export default function WorkspacesPage() {
 
         {/* ── Right sidebar ──────────────────────────────────────────────── */}
         <div className="w-[272px] shrink-0 space-y-4">
-
-          {/* Upcoming Events */}
-          <div className="bg-white border border-[#e0e0e0] rounded-xl p-4">
-            <div className="flex items-center justify-between mb-1">
-              <p className="text-[13.5px] font-bold text-gray-900">Upcoming Events</p>
-              <button
-                onClick={() => navigate(dashboardPath)}
-                className="text-[12px] text-primary-600 font-medium hover:underline"
-              >
-                View calendar
-              </button>
-            </div>
-            {withDeadlines.length > 0 ? (
-              <>
-                {withDeadlines.map(ws => <DeadlineRow key={ws.id} ws={ws} navigate={navigate} />)}
-                <button
-                  onClick={() => navigate(dashboardPath)}
-                  className="mt-2 text-[12px] text-primary-600 font-semibold flex items-center gap-1 hover:underline"
-                >
-                  See all events <ArrowUpRight size={12} />
-                </button>
-              </>
-            ) : (
-              <p className="text-[12px] text-gray-400 py-4 text-center">No upcoming deadlines.</p>
-            )}
-          </div>
 
           {/* Tasks in Progress */}
           <div className="bg-white border border-[#e0e0e0] rounded-xl p-4">

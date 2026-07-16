@@ -1,6 +1,6 @@
 import { useRef, useState, useEffect } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Home, BookOpen, Users, CheckSquare, MessageSquare, ArrowLeft, Settings, Globe, Lock, EyeOff, FileText, ChevronDown, Check, ClipboardList } from 'lucide-react';
+import { Home, BookOpen, Users, CheckSquare, MessageSquare, ArrowLeft, Settings, Globe, Lock, EyeOff, FileText, ChevronDown, Check, ClipboardList, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useWorkspace } from '../../context/WorkspaceContext';
 import { useAuth } from '../../context/AuthContext';
 import { useApiList } from '../../hooks/useApi';
@@ -30,7 +30,21 @@ function getResourceIcon(r: WorkspaceResource) {
   return <FileText size={12} />;
 }
 
-export default function WorkspaceSidebar({ width }: { width?: number }) {
+function Tooltip({ label }: { label: string }) {
+  return (
+    <span className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-[11px] font-medium rounded-md whitespace-nowrap opacity-0 group-hover/tip:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg">
+      {label}
+    </span>
+  );
+}
+
+interface WorkspaceSidebarProps {
+  width?: number;
+  collapsed?: boolean;
+  onToggle?: () => void;
+}
+
+export default function WorkspaceSidebar({ width, collapsed = false, onToggle }: WorkspaceSidebarProps) {
   const { workspace, isOwner, isMentor } = useWorkspace();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -66,101 +80,144 @@ export default function WorkspaceSidebar({ width }: { width?: number }) {
 
   return (
     <aside
-      className="fixed top-10 bottom-0 left-0 z-20 flex flex-col bg-white border-r border-gray-200 overflow-y-auto overflow-x-hidden"
-      style={{ width: width ?? 185 }}
+      className="fixed top-10 bottom-0 left-0 z-20 flex flex-col bg-white border-r border-gray-200 overflow-y-auto overflow-x-hidden transition-all duration-200"
+      style={{ width: width ?? 204 }}
     >
 
       {/* Workspace switcher */}
-      <div className="px-3.5 py-3 bg-gray-50 border-b border-gray-100 shrink-0 relative" ref={dropdownRef}>
-        <div className="flex items-center gap-1">
+      {collapsed ? (
+        <div className="px-2 py-3 bg-gray-50 border-b border-gray-100 shrink-0 flex justify-center">
           <button
-            onClick={() => setDropdownOpen(o => !o)}
-            className="flex-1 min-w-0 flex items-center gap-2.5 rounded-lg hover:bg-gray-100 px-1 py-1 transition-colors"
+            onClick={() => navigate(base)}
+            className="relative group/tip"
           >
             {workspace.logo_url ? (
-              <img src={workspace.logo_url} alt="logo" className="w-8 h-8 rounded-lg object-cover shrink-0" />
+              <img src={workspace.logo_url} alt="logo" className="w-8 h-8 rounded-lg object-cover" />
             ) : (
-              <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 text-[16px] shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 text-[16px]">
                 {workspace.icon_emoji || workspace.name[0]?.toUpperCase()}
               </div>
             )}
-            <div className="flex-1 min-w-0 text-left">
-              <p className="text-[13px] font-bold text-gray-900 truncate leading-tight">{workspace.name}</p>
-              <div className="flex items-center gap-1 mt-0.5">
-                <PrivacyIcon privacy={workspace.privacy} />
-                <span className="text-[10px] text-gray-400 capitalize">
-                  {isMentor ? 'Mentor' : `${workspace.privacy} workspace`}
-                </span>
+            <Tooltip label={workspace.name} />
+          </button>
+        </div>
+      ) : (
+        <div className="px-3.5 py-3 bg-gray-50 border-b border-gray-100 shrink-0 relative" ref={dropdownRef}>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setDropdownOpen(o => !o)}
+              className="flex-1 min-w-0 flex items-center gap-2.5 rounded-lg hover:bg-gray-100 px-1 py-1 transition-colors"
+            >
+              {workspace.logo_url ? (
+                <img src={workspace.logo_url} alt="logo" className="w-8 h-8 rounded-lg object-cover shrink-0" />
+              ) : (
+                <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600 text-[16px] shrink-0">
+                  {workspace.icon_emoji || workspace.name[0]?.toUpperCase()}
+                </div>
+              )}
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-[13px] font-bold text-gray-900 truncate leading-tight">{workspace.name}</p>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <PrivacyIcon privacy={workspace.privacy} />
+                  <span className="text-[10px] text-gray-400 capitalize">
+                    {isMentor ? 'Mentor' : `${workspace.privacy} workspace`}
+                  </span>
+                </div>
+              </div>
+              <ChevronDown size={14} className={`shrink-0 text-gray-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isOwner && (
+              <NavLink
+                to={`${base}/settings`}
+                title="Workspace settings"
+                className={({ isActive }) =>
+                  ['shrink-0 p-1.5 rounded-md transition-colors',
+                    isActive ? 'text-gray-900 bg-gray-100' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100',
+                  ].join(' ')
+                }
+              >
+                <Settings size={13} />
+              </NavLink>
+            )}
+          </div>
+
+          {/* Dropdown */}
+          {dropdownOpen && (
+            <div className="absolute left-2 right-2 top-full mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden py-1">
+              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 pt-2 pb-1.5">
+                My Workspaces
+              </p>
+              <div className="max-h-64 overflow-y-auto">
+                {memberWorkspaces.length === 0 && (
+                <p className="text-[12px] text-gray-500 px-3 py-3">No workspaces found.</p>
+                )}
+                {memberWorkspaces.map(w => (
+                  <button
+                    key={w.id}
+                    onClick={() => { setDropdownOpen(false); navigate(`/w/${w.slug}`); }}
+                    className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 transition-colors text-left"
+                  >
+                    {w.logo_url ? (
+                      <img src={w.logo_url} alt="" className="w-7 h-7 rounded-md object-cover shrink-0" />
+                    ) : (
+                      <div className="w-7 h-7 rounded-md flex items-center justify-center text-gray-600 text-[13px] shrink-0 bg-gray-100">
+                        {w.icon_emoji || w.name[0]?.toUpperCase()}
+                      </div>
+                    )}
+                    <span className="flex-1 min-w-0 text-[12.5px] font-medium text-gray-900 truncate">{w.name}</span>
+                    {w.id === workspace.id && <Check size={13} className="shrink-0 text-primary-600" />}
+                  </button>
+                ))}
+              </div>
+              <div className="border-t border-gray-100 mt-1">
+                <button
+                  onClick={() => { setDropdownOpen(false); navigate('/workspaces'); }}
+                  className="w-full flex items-center gap-2 px-3 py-2.5 text-[12px] text-gray-500 hover:text-gray-800 hover:bg-gray-50 transition-colors"
+                >
+                  <ArrowLeft size={12} /> All workspaces
+                </button>
               </div>
             </div>
-            <ChevronDown size={14} className={`shrink-0 text-gray-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
-          </button>
+          )}
+        </div>
+      )}
 
-          {isOwner && (
+      {/* Nav */}
+      <nav className={['px-2 py-2 shrink-0', collapsed ? 'flex flex-col items-center gap-1' : 'space-y-0.5'].join(' ')}>
+        {collapsed ? (
+          <Link
+            to="/workspaces"
+            className="flex items-center justify-center w-9 h-9 rounded-lg text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors relative group/tip mb-1"
+          >
+            <ArrowLeft size={15} />
+            <Tooltip label="Back to platform" />
+          </Link>
+        ) : (
+          <Link to="/workspaces"
+            className="flex items-center gap-2.5 px-2.5 py-1 rounded-md text-[12.5px] font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors mb-1">
+            <ArrowLeft size={15} /> Back to platform
+          </Link>
+        )}
+
+        {NAV.map(item => {
+          const to = item.path ? `${base}${item.path}` : base;
+          return collapsed ? (
             <NavLink
-              to={`${base}/settings`}
-              title="Workspace settings"
+              key={item.label}
+              to={to}
+              end={item.path === ''}
               className={({ isActive }) =>
-                ['shrink-0 p-1.5 rounded-md transition-colors',
-                  isActive ? 'text-gray-900 bg-gray-100' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100',
+                [
+                  'flex items-center justify-center w-9 h-9 rounded-lg transition-colors relative group/tip',
+                  isActive ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
                 ].join(' ')
               }
             >
-              <Settings size={13} />
+              <span className="shrink-0">{item.icon}</span>
+              <Tooltip label={item.label} />
             </NavLink>
-          )}
-        </div>
-
-        {/* Dropdown */}
-        {dropdownOpen && (
-          <div className="absolute left-2 right-2 top-full mt-1 z-50 bg-white border border-gray-200 rounded-xl shadow-2xl overflow-hidden py-1">
-            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 pt-2 pb-1.5">
-              My Workspaces
-            </p>
-            <div className="max-h-64 overflow-y-auto">
-              {memberWorkspaces.length === 0 && (
-              <p className="text-[12px] text-gray-500 px-3 py-3">No workspaces found.</p>
-              )}
-              {memberWorkspaces.map(w => (
-                <button
-                  key={w.id}
-                  onClick={() => { setDropdownOpen(false); navigate(`/w/${w.slug}`); }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 hover:bg-gray-50 transition-colors text-left"
-                >
-                  {w.logo_url ? (
-                    <img src={w.logo_url} alt="" className="w-7 h-7 rounded-md object-cover shrink-0" />
-                  ) : (
-                    <div className="w-7 h-7 rounded-md flex items-center justify-center text-gray-600 text-[13px] shrink-0 bg-gray-100">
-                      {w.icon_emoji || w.name[0]?.toUpperCase()}
-                    </div>
-                  )}
-                  <span className="flex-1 min-w-0 text-[12.5px] font-medium text-gray-900 truncate">{w.name}</span>
-                  {w.id === workspace.id && <Check size={13} className="shrink-0 text-primary-600" />}
-                </button>
-              ))}
-            </div>
-            <div className="border-t border-gray-100 mt-1">
-              <button
-                onClick={() => { setDropdownOpen(false); navigate('/workspaces'); }}
-                className="w-full flex items-center gap-2 px-3 py-2.5 text-[12px] text-gray-500 hover:text-gray-800 hover:bg-gray-50 transition-colors"
-              >
-                <ArrowLeft size={12} /> All workspaces
-              </button>
-            </div>
-          </div>
-        )}
-
-      </div>
-
-      {/* Nav */}
-      <nav className="px-2 py-2 space-y-0.5 shrink-0">
-        <Link to="/workspaces"
-          className="flex items-center gap-2.5 px-2.5 py-1 rounded-md text-[12.5px] font-medium text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors mb-1">
-          <ArrowLeft size={15} /> Back to platform
-        </Link>
-        {NAV.map(item => {
-          const to = item.path ? `${base}${item.path}` : base;
-          return (
+          ) : (
             <NavLink
               key={item.label}
               to={to}
@@ -178,23 +235,39 @@ export default function WorkspaceSidebar({ width }: { width?: number }) {
             </NavLink>
           );
         })}
+
         {isOwner && (
-          <NavLink
-            to={`${base}/submissions`}
-            className={({ isActive }) =>
-              ['flex items-center gap-2.5 px-2.5 py-1 rounded-md text-[12.5px] font-medium transition-colors',
-                isActive ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
-              ].join(' ')
-            }
-          >
-            <span className="shrink-0"><ClipboardList size={15} /></span>
-            Submissions
-          </NavLink>
+          collapsed ? (
+            <NavLink
+              to={`${base}/submissions`}
+              className={({ isActive }) =>
+                [
+                  'flex items-center justify-center w-9 h-9 rounded-lg transition-colors relative group/tip',
+                  isActive ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                ].join(' ')
+              }
+            >
+              <span className="shrink-0"><ClipboardList size={15} /></span>
+              <Tooltip label="Submissions" />
+            </NavLink>
+          ) : (
+            <NavLink
+              to={`${base}/submissions`}
+              className={({ isActive }) =>
+                ['flex items-center gap-2.5 px-2.5 py-1 rounded-md text-[12.5px] font-medium transition-colors',
+                  isActive ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+                ].join(' ')
+              }
+            >
+              <span className="shrink-0"><ClipboardList size={15} /></span>
+              Submissions
+            </NavLink>
+          )
         )}
       </nav>
 
-      {/* Quick Access */}
-      {quickResources.length > 0 && (
+      {/* Quick Access — hidden when collapsed */}
+      {!collapsed && quickResources.length > 0 && (
         <div className="px-3.5 py-3 border-t border-gray-100 shrink-0">
           <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">
             Quick Access
@@ -225,17 +298,34 @@ export default function WorkspaceSidebar({ width }: { width?: number }) {
         </div>
       )}
 
-
       {/* Spacer */}
       <div className="flex-1" />
 
       {/* Footer */}
-      <div className="px-3.5 py-3 mb-2 bg-gray-50 border-t border-gray-100 shrink-0">
-        <div className="flex items-center gap-2">
+      <div className={['bg-gray-50 border-t border-gray-100 shrink-0', collapsed ? 'px-2 py-3 flex justify-center' : 'px-3.5 py-3 mb-2'].join(' ')}>
+        {collapsed ? (
           <Avatar name={displayName} size="sm" />
-          <span className="text-[11.5px] text-gray-600 truncate">{displayName || `@${user?.username}`}</span>
-        </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Avatar name={displayName} size="sm" />
+            <span className="text-[11.5px] text-gray-600 truncate">{displayName || `@${user?.username}`}</span>
+          </div>
+        )}
       </div>
+
+      {/* Collapse toggle */}
+      <button
+        onClick={onToggle}
+        className={[
+          'flex items-center py-2.5 border-t border-gray-100 text-[12px] font-medium text-gray-400 hover:text-gray-700 hover:bg-gray-50 transition-colors shrink-0',
+          collapsed ? 'justify-center px-0' : 'gap-1.5 px-3',
+        ].join(' ')}
+      >
+        {collapsed
+          ? <ChevronRight size={14} />
+          : <><ChevronLeft size={14} /><span>Collapse</span></>
+        }
+      </button>
     </aside>
   );
 }

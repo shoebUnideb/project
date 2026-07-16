@@ -13,13 +13,15 @@ import type { WorkspaceOnboardingQuestion, WorkspaceOnboardingAnswer } from '../
 
 const MIN_WIDTH = 120;
 const MAX_WIDTH = 360;
-const DEFAULT_WIDTH = 185;
+const DEFAULT_WIDTH = 204;
+const COLLAPSED_WIDTH = 56;
 
 function WorkspaceShellInner() {
   const { workspace, loading, error, isMember } = useWorkspace();
   const { user } = useAuth();
   const location = useLocation();
   const [sidebarWidth, setSidebarWidth] = useState(DEFAULT_WIDTH);
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem('ws_sidebar_collapsed') === 'true');
   const dragging = useRef(false);
   const startX = useRef(0);
   const startWidth = useRef(DEFAULT_WIDTH);
@@ -33,7 +35,6 @@ function WorkspaceShellInner() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
-  // Fetch workspace questions + student's existing answers once workspace is ready
   useEffect(() => {
     if (!workspace || !isMember || user?.role !== 'student') return;
     Promise.all([
@@ -44,6 +45,14 @@ function WorkspaceShellInner() {
       setWsAnswers(ans);
     }).catch(() => {}).finally(() => setWsOnboardingLoaded(true));
   }, [workspace?.id, isMember, user?.role]);
+
+  const handleToggle = useCallback(() => {
+    setCollapsed(c => {
+      const next = !c;
+      localStorage.setItem('ws_sidebar_collapsed', String(next));
+      return next;
+    });
+  }, []);
 
   const onDragStart = useCallback((e: React.MouseEvent) => {
     dragging.current = true;
@@ -70,7 +79,8 @@ function WorkspaceShellInner() {
     document.addEventListener('mouseup', onMouseUp);
   }, [sidebarWidth]);
 
-  // Show banner when: student + approved member + workspace has questions + not all required answered
+  const effectiveWidth = collapsed ? COLLAPSED_WIDTH : sidebarWidth;
+
   const answeredIds = new Set(wsAnswers.filter(a => a.answer_text.trim()).map(a => a.question));
   const hasUnanswered = wsOnboardingLoaded &&
     wsQuestions.length > 0 &&
@@ -102,18 +112,23 @@ function WorkspaceShellInner() {
   return (
     <div className="min-h-screen bg-[#f8f8f8]">
       <Topbar />
-      <WorkspaceSidebar width={sidebarWidth} />
+      <WorkspaceSidebar width={effectiveWidth} collapsed={collapsed} onToggle={handleToggle} />
 
-      {/* Drag handle */}
+      {/* Drag handle — only when expanded */}
+      {!collapsed && (
+        <div
+          onMouseDown={onDragStart}
+          className="fixed top-10 bottom-0 z-30 w-1 cursor-col-resize group"
+          style={{ left: sidebarWidth - 1 }}
+        >
+          <div className="h-full w-full bg-transparent group-hover:bg-primary-400/40 transition-colors" />
+        </div>
+      )}
+
       <div
-        onMouseDown={onDragStart}
-        className="fixed top-10 bottom-0 z-30 w-1 cursor-col-resize group"
-        style={{ left: sidebarWidth - 1 }}
+        className="mt-10 flex flex-col min-h-[calc(100vh-40px)] transition-all duration-200"
+        style={{ marginLeft: effectiveWidth }}
       >
-        <div className="h-full w-full bg-transparent group-hover:bg-primary-400/40 transition-colors" />
-      </div>
-
-      <div className="mt-10 flex flex-col min-h-[calc(100vh-40px)]" style={{ marginLeft: sidebarWidth }}>
         {showWsBanner && (
           <OnboardingBanner
             message={`${workspace.name} has intake questions for you.`}
@@ -132,8 +147,6 @@ function WorkspaceShellInner() {
           workspaceId={workspace.id}
           onClose={() => setShowWsForm(false)}
           onSaved={() => {
-            // Optimistically mark all questions answered so banner hides immediately,
-            // then reconcile with server state
             setWsAnswers(prev => {
               const existing = new Map(prev.map(a => [a.question, a]));
               wsQuestions.forEach(q => {

@@ -77,7 +77,6 @@ export default function CreateWorkspaceModal({ onClose, onCreated, mode = 'creat
   const [level, setLevel]               = useState<WorkspaceLevel | ''>(initial?.level ?? '');
   const [focusArea, setFocusArea]       = useState(initial?.target_country ?? '');
   const [language, setLanguage]         = useState(initial?.language ?? '');
-  const [targetDeadline, setTargetDeadline] = useState(initial?.target_deadline ?? '');
   const [officeHours, setOfficeHours]   = useState(initial?.office_hours ?? '');
   const [tags, setTags]                 = useState(initial?.tags ?? '');
 
@@ -95,7 +94,7 @@ export default function CreateWorkspaceModal({ onClose, onCreated, mode = 'creat
   const [error, setError]   = useState('');
   const [loading, setLoading] = useState(false);
 
-  const inputCls = 'w-full px-3.5 py-2.5 text-[13px] border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent placeholder-gray-300 bg-white';
+  const inputCls = 'w-full h-10 px-3.5 text-[13px] border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent placeholder-gray-300 bg-white';
   const labelCls = 'block text-[11px] font-semibold text-gray-500 uppercase tracking-widest mb-1.5';
   const selectCls = inputCls + ' cursor-pointer';
 
@@ -118,7 +117,6 @@ export default function CreateWorkspaceModal({ onClose, onCreated, mode = 'creat
       fd.append('level', level);
       fd.append('target_country', focusArea.trim());
       fd.append('language', language.trim());
-      if (targetDeadline) fd.append('target_deadline', targetDeadline);
       fd.append('office_hours', officeHours.trim());
       fd.append('tags', tags.trim());
       fd.append('privacy', privacy);
@@ -332,10 +330,6 @@ export default function CreateWorkspaceModal({ onClose, onCreated, mode = 'creat
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelCls}>Target date</label>
-                  <input type="date" value={targetDeadline} onChange={e => setTargetDeadline(e.target.value)} className={inputCls} />
-                </div>
                 <div>
                   <label className={labelCls}>Office hours</label>
                   <input value={officeHours} onChange={e => setOfficeHours(e.target.value)}

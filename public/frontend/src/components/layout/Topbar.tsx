@@ -207,15 +207,15 @@ export default function Topbar() {
           </button>
 
           {/* Apps switcher */}
-          <AppSwitcher />
+          <AppSwitcher variant="light" />
 
           {/* ── Bell + notification panel ─────────────────────── */}
           <div ref={notifRef} className="relative">
             <button
               onClick={handleBellClick}
-              className="relative p-2 rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors"
+              className="relative p-2 rounded-md text-gray-600 hover:bg-gray-100 hover:text-gray-900 transition-colors"
             >
-              <Bell size={15} />
+              <Bell size={17} />
               {unread > 0 && (
                 <span className="absolute top-1 right-1 min-w-[14px] h-3.5 px-0.5 bg-rose-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center ring-2 ring-white">
                   {unread > 9 ? '9+' : unread}

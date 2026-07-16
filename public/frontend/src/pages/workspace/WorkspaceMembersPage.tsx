@@ -905,21 +905,21 @@ export default function WorkspaceMembersPage() {
 
           {/* Filter toolbar */}
           <div className="flex items-center gap-2 flex-wrap mb-3">
-            <div className="relative flex-1 min-w-[160px] max-w-[220px]">
+            <div className="relative flex-1 min-w-[160px] max-w-[220px] h-8">
               <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input value={search} onChange={e => { setSearch(e.target.value); setPage(1); }}
                 placeholder="Search members..."
-                className="w-full pl-8 pr-3 py-2 text-[12.5px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent bg-white" />
+                className="w-full h-full pl-8 pr-3 text-[12.5px] border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-transparent bg-white" />
             </div>
             <select value={statusFilter} onChange={e => { setStatus(e.target.value); setPage(1); }}
-              className="px-3 py-2 text-[12.5px] border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-400 cursor-pointer">
+              className="h-8 px-3 text-[12.5px] border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-400 cursor-pointer">
               <option value="all">All status</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
             {tab === 'all' && (
               <select value={typeFilter} onChange={e => { setTypeFilter(e.target.value as typeof typeFilter); setPage(1); }}
-                className="px-3 py-2 text-[12.5px] border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-400 cursor-pointer">
+                className="h-8 px-3 text-[12.5px] border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-400 cursor-pointer">
                 <option value="all">All types</option>
                 <option value="admin">Admin</option>
                 <option value="mentor">Mentor</option>
@@ -927,13 +927,13 @@ export default function WorkspaceMembersPage() {
               </select>
             )}
             <select value={uniFilter} onChange={e => { setUni(e.target.value); setPage(1); }}
-              className="px-3 py-2 text-[12.5px] border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-400 cursor-pointer max-w-[160px] truncate">
+              className="h-8 px-3 text-[12.5px] border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-primary-400 cursor-pointer max-w-[160px] truncate">
               {universities.map(u => (
                 <option key={u} value={u}>{u === 'all' ? 'All universities' : u}</option>
               ))}
             </select>
             <button onClick={() => setShowFilters(v => !v)}
-              className={`flex items-center gap-1.5 px-3 py-2 text-[12.5px] font-semibold border rounded-lg transition-colors ${
+              className={`h-8 flex items-center gap-1.5 px-3 text-[12.5px] font-semibold border rounded-lg transition-colors ${
                 showFilters || dateFrom || dateTo
                   ? 'bg-primary-50 border-primary-400 text-primary-700'
                   : 'bg-white border-gray-300 text-gray-600 hover:border-gray-400'
@@ -942,7 +942,7 @@ export default function WorkspaceMembersPage() {
             </button>
             {hasFilters && (
               <button onClick={clearFilters}
-                className="px-3 py-2 text-[12.5px] font-semibold text-primary-600 hover:text-primary-800 transition-colors">
+                className="h-8 px-3 text-[12.5px] font-semibold text-primary-600 hover:text-primary-800 transition-colors">
                 Clear all
               </button>
             )}

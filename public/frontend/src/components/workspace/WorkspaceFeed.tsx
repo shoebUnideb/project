@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { Pencil, Trash2, Send, ImagePlus, X, ArrowUpDown, Pin } from 'lucide-react';
+import { Pencil, Trash2, Send, ImagePlus, X, ArrowUpDown, Pin, ChevronDown, ChevronUp } from 'lucide-react';
 import { workspacesApi } from '../../api/workspaces';
 import RichTextEditor from '../ui/RichTextEditor';
 import { useWorkspace } from '../../context/WorkspaceContext';
@@ -239,6 +239,7 @@ export default function WorkspaceFeed({ workspaceId, children, onPostsChange }: 
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [posting, setPosting] = useState(false);
   const [editorKey, setEditorKey] = useState(0);
+  const [composerOpen, setComposerOpen] = useState(false);
   const [confirmDeletePostId, setConfirmDeletePostId] = useState<number | null>(null);
   const [deletingPost, setDeletingPost] = useState(false);
   const imgRef = useRef<HTMLInputElement>(null);
@@ -264,6 +265,7 @@ export default function WorkspaceFeed({ workspaceId, children, onPostsChange }: 
     setImagePreview(null);
     setEditorKey(k => k + 1);
     setPosting(false);
+    setComposerOpen(false);
   };
 
   const handleDelete = async (id: number) => {
@@ -308,53 +310,75 @@ export default function WorkspaceFeed({ workspaceId, children, onPostsChange }: 
     <div className="space-y-4">
       {/* Compose box — coordinator and mentors */}
       {canWrite && (
-        <div className="bg-white rounded-xl border border-[#e0e0e0] p-4">
-          <div className="flex items-center gap-3 mb-3">
-            <UserAvatar src={user?.profile_picture} name={user ? `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim() || user.username : ''} />
-            <p className="text-[13px] font-medium text-gray-500">Share an update with your workspace…</p>
-          </div>
+        <div className="bg-white rounded-xl border border-[#e0e0e0]">
+          {/* Collapsed trigger */}
+          {!composerOpen ? (
+            <button
+              onClick={() => setComposerOpen(true)}
+              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors rounded-xl text-left group"
+            >
+              <UserAvatar src={user?.profile_picture} name={user ? `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim() || user.username : ''} />
+              <span className="flex-1 text-[13px] font-semibold text-gray-500 group-hover:text-gray-700 transition-colors">Share an update with your workspace…</span>
+              <ChevronDown size={15} className="shrink-0 text-gray-400 group-hover:text-gray-600 transition-colors" />
+            </button>
+          ) : (
+            <div className="p-4">
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3">
+                  <UserAvatar src={user?.profile_picture} name={user ? `${user.first_name ?? ''} ${user.last_name ?? ''}`.trim() || user.username : ''} />
+                  <p className="text-[13px] font-semibold text-gray-700">Share an update with your workspace…</p>
+                </div>
+                <button
+                  onClick={() => { setComposerOpen(false); setBody(''); setImageFile(null); setImagePreview(null); setEditorKey(k => k + 1); }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-md hover:bg-gray-100"
+                >
+                  <ChevronUp size={15} />
+                </button>
+              </div>
 
-          <RichTextEditor key={editorKey} value={body} onChange={setBody} placeholder="Write something for your members…" minHeight={80} />
+              <RichTextEditor key={editorKey} value={body} onChange={setBody} placeholder="Write something for your members…" minHeight={80} />
 
-          {/* Image preview */}
-          {imagePreview && (
-            <div className="relative mt-3 inline-block">
-              <img src={imagePreview} alt="" className="h-28 rounded-lg object-cover border border-gray-200" />
-              <button
-                onClick={() => { setImageFile(null); setImagePreview(null); }}
-                className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gray-700 rounded-full flex items-center justify-center text-white hover:bg-red-500 transition-colors"
-              >
-                <X size={10} />
-              </button>
+              {/* Image preview */}
+              {imagePreview && (
+                <div className="relative mt-3 inline-block">
+                  <img src={imagePreview} alt="" className="h-28 rounded-lg object-cover border border-gray-200" />
+                  <button
+                    onClick={() => { setImageFile(null); setImagePreview(null); }}
+                    className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gray-700 rounded-full flex items-center justify-center text-white hover:bg-red-500 transition-colors"
+                  >
+                    <X size={10} />
+                  </button>
+                </div>
+              )}
+
+              {/* Footer row */}
+              <div className="flex items-center justify-between mt-3">
+                <button
+                  type="button"
+                  onClick={() => imgRef.current?.click()}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <ImagePlus size={14} />
+                  {imagePreview ? 'Change image' : 'Attach image'}
+                </button>
+                <input ref={imgRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp" className="hidden" onChange={e => {
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  setImageFile(f);
+                  setImagePreview(URL.createObjectURL(f));
+                }} />
+
+                <button
+                  onClick={handlePost}
+                  disabled={!canPost}
+                  className="flex items-center gap-1.5 px-4 py-2 text-[12.5px] font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl disabled:opacity-50 transition-colors"
+                >
+                  <Send size={13} />
+                  {posting ? 'Posting…' : 'Post update'}
+                </button>
+              </div>
             </div>
           )}
-
-          {/* Footer row */}
-          <div className="flex items-center justify-between mt-3">
-            <button
-              type="button"
-              onClick={() => imgRef.current?.click()}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-gray-500 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-colors"
-            >
-              <ImagePlus size={14} />
-              {imagePreview ? 'Change image' : 'Attach image'}
-            </button>
-            <input ref={imgRef} type="file" accept="image/jpeg,image/png,image/gif,image/webp" className="hidden" onChange={e => {
-              const f = e.target.files?.[0];
-              if (!f) return;
-              setImageFile(f);
-              setImagePreview(URL.createObjectURL(f));
-            }} />
-
-            <button
-              onClick={handlePost}
-              disabled={!canPost}
-              className="flex items-center gap-1.5 px-4 py-2 text-[12.5px] font-semibold text-white bg-primary-600 hover:bg-primary-700 rounded-xl disabled:opacity-50 transition-colors"
-            >
-              <Send size={13} />
-              {posting ? 'Posting…' : 'Post update'}
-            </button>
-          </div>
         </div>
       )}
 
