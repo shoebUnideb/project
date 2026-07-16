@@ -332,3 +332,8 @@
 127.0.0.1:62601 - - [16/Jul/2026:22:29:00] "GET /api/workspaces/" 200 3801
 127.0.0.1:62605 - - [16/Jul/2026:22:29:00] "GET /api/workspaces/" 200 2563
 127.0.0.1:62622 - - [16/Jul/2026:22:29:17] "GET /api/notifications/?limit=20" 200 647
+127.0.0.1:62650 - - [16/Jul/2026:22:29:47] "GET /api/notifications/?limit=20" 200 647
+127.0.0.1:62655 - - [16/Jul/2026:22:29:49] "GET /api/notifications/?limit=20" 200 1614
+127.0.0.1:62736 - - [16/Jul/2026:22:30:17] "GET /api/notifications/?limit=20" 200 647
+127.0.0.1:62770 - - [16/Jul/2026:22:30:47] "GET /api/notifications/?limit=20" 200 647
+127.0.0.1:62775 - - [16/Jul/2026:22:30:49] "GET /api/notifications/?limit=20" 200 1614
